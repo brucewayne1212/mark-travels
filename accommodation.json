@@ -1,0 +1,33 @@
+{
+  "accommodation": {
+    "rome": {
+      "name": "Casa Nanna Chic in Vatican",
+      "address": "Via Andrea Doria 16, 00192 Roma",
+      "lat": 41.9104386,
+      "lng": 12.4538441,
+      "source": "travel-map-rome"
+    },
+    "corfu": {
+      "name": "Three Stars Beach Hotel",
+      "address": "Moraitika 490 84, Greece",
+      "lat": 39.4822387,
+      "lng": 19.9311771,
+      "source": "google-places"
+    },
+    "florida": {
+      "name": "Hampton Circle (friends' house)",
+      "address": "Hampton Cir, Jupiter, FL 33458, USA",
+      "lat": 26.9138697,
+      "lng": -80.1161777,
+      "source": "google-places"
+    },
+    "cambridge": {
+      "name": null,
+      "status": "research-only, not confirmed booked"
+    },
+    "barcelona": {
+      "name": null,
+      "status": "school trip, group accommodation"
+    }
+  }
+}

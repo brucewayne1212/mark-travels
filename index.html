@@ -43,10 +43,10 @@
             display: block;
         }
         .trip-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-        .trip-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+        .trip-header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
         .trip-icon { font-size: 2.4rem; flex-shrink: 0; }
         .trip-info { flex: 1; }
-        .trip-info h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+        .trip-info h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 2px; }
         .trip-dates { color: var(--text-muted); font-size: 0.95rem; }
         .trip-countdown {
             margin-top: 6px;
@@ -57,11 +57,17 @@
         .trip-countdown.soon { color: var(--orange); }
         .trip-countdown.waiting { color: var(--accent); }
         .trip-countdown.past { color: var(--text-muted); }
+        .trip-duration {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
         .trip-status {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 4px 12px; border-radius: 20px;
             font-size: 0.82rem; font-weight: 600;
             text-transform: uppercase; letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         .trip-status.upcoming { background: rgba(74,158,255,0.15); color: var(--accent); }
         .trip-status.active { background: rgba(76,175,80,0.15); color: var(--green); }
@@ -76,6 +82,15 @@
             font-size: 0.9rem; color: var(--text-muted);
         }
         .trip-meta-item .icon { font-size: 1.1rem; }
+        .trip-accommodation {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .trip-accommodation strong { color: var(--text); font-weight: 600; }
         .map-link {
             display: inline-flex; align-items: center; gap: 8px;
             margin-top: 16px; padding: 10px 20px;
@@ -88,8 +103,9 @@
         footer { text-align: center; padding: 48px 0 32px; color: var(--text-muted); font-size: 0.85rem; }
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
-            .trip-header { flex-direction: column; text-align: center; }
+            .trip-header { flex-direction: column; text-align: center; align-items: flex-start; }
             .trip-meta { justify-content: center; }
+            .trip-status { align-self: center; }
         }
     </style>
 </head>
@@ -113,6 +129,8 @@
             end: "2026-07-17",
             hasMap: false,
             page: "trips/barcelona-2026.html",
+            accommodation: null,
+            accommodationNote: "School trip — group accommodation",
             meta: [{ icon: "🎒", label: "School trip" }]
         },
         {
@@ -122,6 +140,12 @@
             end: "2026-08-01",
             hasMap: false,
             page: "trips/florida-2026.html",
+            accommodation: {
+                name: "Hampton Circle (friends' house)",
+                address: "Hampton Cir, Jupiter, FL 33458",
+                lat: 26.9138697,
+                lng: -80.1161777
+            },
             meta: [
                 { icon: "✈️", label: "LHR → JFK → MIA / PBI → ATL → LHR" },
                 { icon: "👨‍👩‍👧‍👧", label: "4 adults, 4 kids" }
@@ -134,10 +158,15 @@
             end: "2026-08-12",
             hasMap: false,
             page: "trips/corfu-2026.html",
+            accommodation: {
+                name: "Three Stars Beach Hotel",
+                address: "Moraitika 490 84, Greece",
+                lat: 39.4822387,
+                lng: 19.9311771
+            },
             meta: [
                 { icon: "✈️", label: "BA0646 / BA0645" },
-                { icon: "👨‍👩‍👧‍👧", label: "Family holiday" },
-                { icon: "🏨", label: "Messonghi" }
+                { icon: "👨‍👩‍👧‍👧", label: "Family holiday" }
             ]
         },
         {
@@ -147,6 +176,8 @@
             end: "2026-07-06",
             hasMap: true,
             page: "trips/cambridge-2026.html",
+            accommodation: null,
+            accommodationNote: null,
             meta: []
         },
         {
@@ -156,6 +187,12 @@
             end: "2026-05-29",
             hasMap: true,
             page: "trips/rome-2026.html",
+            accommodation: {
+                name: "Casa Nanna Chic in Vatican",
+                address: "Via Andrea Doria 16, 00192 Roma",
+                lat: 41.9104386,
+                lng: 12.4538441
+            },
             meta: []
         }
     ];
@@ -175,18 +212,14 @@
         now.setHours(0,0,0,0);
         const start = new Date(trip.start + "T00:00:00");
         const end = new Date(trip.end + "T00:00:00");
-
         const daysUntil = daysBetween(now, start);
         const daysTotal = daysBetween(start, end) + 1;
 
         let html, cssClass;
-
         if (daysUntil < 0 && daysBetween(now, end) < 0) {
-            // Trip fully in the past
             html = `Completed — ${Math.abs(daysUntil + daysTotal - 1)} day${daysTotal > 1 ? 's' : ''} ago`;
             cssClass = "past";
         } else if (daysUntil <= 0 && daysBetween(now, end) >= 0) {
-            // Currently on the trip
             const dayOf = daysBetween(start, now) + 1;
             html = `📍 Day ${dayOf} of ${daysTotal} — happening now!`;
             cssClass = "in";
@@ -197,7 +230,6 @@
             html = `${daysUntil} days away`;
             cssClass = "waiting";
         }
-
         return { html, cssClass };
     }
 
@@ -208,20 +240,14 @@
             const now = new Date(); now.setHours(0,0,0,0);
             const aStart = new Date(a.start + "T00:00:00");
             const bStart = new Date(b.start + "T00:00:00");
-
-            // Active trips first
             const aActive = now >= aStart && now <= new Date(a.end + "T00:00:00");
             const bActive = now >= bStart && now <= new Date(b.end + "T00:00:00");
             if (aActive && !bActive) return -1;
             if (!aActive && bActive) return 1;
-
-            // Then upcoming (not past)
             const aPast = now > new Date(a.end + "T00:00:00");
             const bPast = now > new Date(b.end + "T00:00:00");
             if (aPast && !bPast) return 1;
             if (!aPast && bPast) return -1;
-
-            // Same category: closest first
             return aStart - bStart;
         });
 
@@ -244,6 +270,23 @@
                 ? `${formatDate(start)} – ${formatDate(end)}`
                 : formatDate(start);
 
+            // Duration string
+            const nights = daysTotal - 1;
+            let durationStr;
+            if (daysTotal > 1) {
+                durationStr = nights === 1 ? `${nights} night` : `${nights} nights`;
+            } else {
+                durationStr = "Day trip";
+            }
+
+            // Accommodation
+            let accomHtml = '';
+            if (trip.accommodation) {
+                accomHtml = `<div class="trip-accommodation">🏨 <strong>${trip.accommodation.name}</strong><br>${trip.accommodation.address}</div>`;
+            } else if (trip.accommodationNote) {
+                accomHtml = `<div class="trip-accommodation">🏨 ${trip.accommodationNote}</div>`;
+            }
+
             const metaHtml = trip.meta.length > 0
                 ? `<div class="trip-meta">${trip.meta.map(m =>
                     `<div class="trip-meta-item"><span class="icon">${m.icon}</span> ${m.label}</div>`
@@ -262,9 +305,11 @@
                             <h2>${trip.destination}</h2>
                             <div class="trip-dates">${dateStr}</div>
                             <div class="trip-countdown ${countdown.cssClass}">${countdown.html}</div>
+                            <div class="trip-duration">📅 ${durationStr}</div>
                         </div>
                         <span class="trip-status ${statusClass}">${status}</span>
                     </div>
+                    ${accomHtml}
                     ${metaHtml}
                     ${mapHtml}
                 </a>
