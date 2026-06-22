@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roma 2026 - Interactive Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --sidebar-width: 320px;
+            --panel-width: 400px;
+            --primary-bg: #ffffff;
+            --accent-color: #007bff;
+            --text-main: #333;
+            --text-muted: #666;
+            --shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #layout {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100%;
+            background: var(--primary-bg);
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        #sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            padding: 10px;
+        }
+
+        .day-group {
+            margin-bottom: 20px;
+        }
+
+        .day-header {
+            font-weight: bold;
+            padding: 8px;
+            background: #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .day-header:hover { background: #e0e0e0; }
+
+        .venue-item {
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+        }
+
+        .venue-item:hover { background: #f9f9f9; }
+        .venue-item span { margin-right: 8px; }
+
+        /* Map Container */
+        #map {
+            flex: 1;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Detail Panel Styles */
+        #detail-panel {
+            position: absolute;
+            top: 0;
+            right: -100%;
+            width: var(--panel-width);
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #detail-panel.active {
+            right: 0;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .detail-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .detail-body {
+            padding: 20px;
+        }
+
+        .detail-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-meta {
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            font-size: 0.95em;
+        }
+
+        .detail-hours {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .detail-hours h4 { margin: 0 0 10px 0; font-size: 1em; }
+        .detail-hours ul { padding-left: 20px; margin: 0; font-size: 0.9em; }
+
+        .btn-more {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1002;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        /* Legend */
+        #legend {
+            padding: 10px;
+            font-size: 0.8em;
+            border-top: 1px solid #ddd;
+        }
+        .legend-item { display: flex; align-items: center; margin-bottom: 4px; }
+        .dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; border: 1px solid #fff; box-shadow: 0 0 2px rgba(0,0,0,0.5); }
+
+        @media (max-width: 600px) {
+            #sidebar { width: 100%; position: absolute; }
+            #detail-panel { width: 100%; }
+            #sidebar.collapsed { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="layout">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+    <button id="geo-btn" class="toggle-btn" style="left: 60px;" onclick="getUserLocation()" title="Show my location">📍</button>
+    
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <strong>Rome 2026</strong>
+        </div>
+        <div class="sidebar-content" id="sidebar-list">
+            <!-- Groups dynamic -->
+        </div>
+        <div id="legend">
+            <strong>Legend</strong>
+            <div class="legend-item"><span class="dot" style="background: purple;"></span> Accommodation</div>
+            <div class="legend-item"><span class="dot" style="background: red;"></span> Attraction</div>
+            <div class="legend-item"><span class="dot" style="background: orange;"></span> Restaurant</div>
+            <div class="legend-item"><span class="dot" style="background: pink;"></span> Gelato</div>
+            <div class="legend-item"><span class="dot" style="background: blue;"></span> Bar</div>
+            <div class="legend-item"><span class="dot" style="background: green;"></span> Beach</div>
+            <div class="legend-item"><span class="dot" style="background: brown;"></span> ☕ Coffee</div>
+            <div class="legend-item"><span class="dot" style="background: #2E7D32;"></span> 🛒 Groceries & Markets</div>
+            <div class="legend-item"><span class="dot" style="background: #7B1FA2;"></span> 🍷 Wine Shops</div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="detail-panel">
+        <button class="panel-close" onclick="closePanel()">✕</button>
+        <img id="p-photo" class="detail-img" src="" alt="Venue Photo" onerror="this.onerror=null; this.style.display=\'none\';">
+        <div class="detail-body">
+            <div id="p-title" class="detail-title"></div>
+            <div id="p-rating" style="color: #f39c12; font-weight: bold; margin-bottom: 10px;"></div>
+            <div class="detail-meta">
+                <div id="p-address" style="margin-bottom: 8px;"></div>
+                <div id="p-web"></div>
+            </div>
+            <div class="detail-hours">
+                <h4>Opening Hours</h4>
+                <div id="p-hours"></div>
+            </div>
+            <div id="p-distance" style="margin-top:12px;"></div>
+            <button class="btn-more" style="margin-top:8px;font-size:0.9em;" onclick="navigateTo('__venue_id__')">🧭 Open in Google Maps</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const PHOTOS = {
+  "palatine": "https://lh3.googleusercontent.com/place-photos/AJRVUZOxzgCe6kdZFOmhcqCypveHjk9VtwdtVwqdQp5LjaZrJgGZ17ojFoROI2zNE7fA9Sz_45altbXSC4rHptpSHRusbUWB05Aw7hXoXtT6A1udNxytAwJGdoOL21WYOOj1Y7LUdruAvVwNVCKlSyM=s4800-h400",
+  "st_peter": "https://lh3.googleusercontent.com/place-photos/AJRVUZOjkRrAyz3rAEkhmcZ30ETfwcoYPQ8nmO4IXxcgkhNqzOJeIE2oI-T1UEgJRBQZZbEj-dRJr1OT7HEeVdAaxAKc7GBX4Dtnjspthoio9rfVcUuo9PHNwMzGlV6NiLZYkNJrI3BNNhXpgV8q_g=s4800-h400",
+  "roman_forum": "https://lh3.googleusercontent.com/place-photos/AJRVUZNUTHDWLfyVA8RhV60VC37t29b3wMGh_DXscv1Nb1PNujjterJQGfs-qJ5Gf-6AQ01sD0mKhYqgGgGd0uibxfEHonXLY9T1AWn7GvxZGQqPJ2T2FCQBFgRqmWah4rPPMglOSISKWgPQQ0x-Ag=s4800-h400",
+  "colosseum": "https://lh3.googleusercontent.com/place-photos/AJRVUZMXN9vALEdVaViiFL-vK_SPpBvKDvl99ZttIJut1jkTZUQDWpuf8pqtdEL5JxmUrCH_lI7Wkp4_I9GuMy6SIa4hj5T2Qera3Iq8qWIxK-LO03LmBObX9qff5LZG0B67XNMLiV8uyg_FsG3uqw=s4800-h400",
+  "trailgrano": "https://lh3.googleusercontent.com/place-photos/AJRVUZMJB1PwhONl25yAewD4-3ICnUtQvVgvrrmQjPzIVXFAGzh9-WsQrzil34lmYSOn-IZTidqMHnSQDnCJiogxOM_-B_ujcUCeua5GQgvGAbESYXZtgyVX_u-lE6WhzDGm_OfE_k3Q1y4YtVmKOw=s4800-h400",
+  "daenzo": "https://lh3.googleusercontent.com/place-photos/AJRVUZOjv1aObOqj2Cof_hOnfyFuKQ-ZYwCzysjLhrsgdWkY0U6VmUa_BJyw0kUiY2SRgPJHz0uYYW88uo8iUCGOTI5h0zlBJhbW1ppAqwG1BGGNF1uxN0QU-OxvDOP005leuv2MT2pDjZ4-jkbgFQ=s4800-h400",
+  "trevi": "https://lh3.googleusercontent.com/place-photos/AJRVUZMPUo3K9QxLrST0WNfTnyTj4NWsKph_qqzMAb1AGiwvvxQiAg6J0g1IwJwgeAhJV9pmAeqYhjMUl0AVXynn4I4epkzCUyr7o4CYiuHid05KGLVEdbshocQztJL_-d1NGrYuLxzFfMh_iQ2RQXPGGrpm=s4800-h400",
+  "flavio": "https://lh3.googleusercontent.com/places/ANXAkqHL-wnPqP6Bij1Yg7-Mm8DNnvdLMeo7V3kzwwHbSLqH2Zef9J3rSCA-u77fQ09sRy3OwJrTamZ0lYO3zFOADRdUG1WW-4Zw7Xo=s4800-h400",
+  "barnum": "https://lh3.googleusercontent.com/place-photos/AJRVUZM2foI-2Mzm6Y8Sy9YNXRsgbNKaMTaBchRdqrkz5BtnCyh7y4VL5tQNzlOUCkepsRdkjsjHwlm_lJuT3Txt7znyDmGLrjhJlzxCgwVvB_fsnCtWSpqw1w4ZRIyuLtSTZ1UtC1KuXBVr2n3U6MBOwp_Tvw=s4800-h400",
+  "taverna": "https://lh3.googleusercontent.com/places/ANXAkqFuYPZPbGhPeyWC7ux7pK9vtZhQ_yNKN63OGI3sN1o2xuJ2OQA7F1Fe44eTz9ERrmdk4xkAd_i_ZZ-y6XgI6-3un_UJwwxwq24=s4800-h400",
+  "friggitoria": "https://lh3.googleusercontent.com/places/ANXAkqFwXgjDYnhda91ZSN6YksaL2gL-Uf8QXZ0MH2zg3ID4tNYKJ2NrqMvS8VEeR9Ogf5QGvlizJ0y1elBKMBi23I2Vhjo6ul563aU=s4800-h400",
+  "montecarlo": "https://lh3.googleusercontent.com/place-photos/AJRVUZMB_Qz0jma-szfzR6hpH282iUECALZPh4eHv50q25nTv4L7fSC8c7qoa93WF5offK6JgCuDGkTdsIc2kbobN35wfEJlJfiP12ypZvb-gvLVAgvQ1vrtGY3S0ilQb-CNXeIomMiD6_ENMNn2DA=s4800-h400",
+  "santeustachio": "https://lh3.googleusercontent.com/places/ANXAkqH2uLst4ElD4PwR0OtaUtHtHPvvc5O6cO8BAcCbNtCKt6nZNpHbE4iM8Pn9KyBh7ndvolhD-BbZ0RYn-FV_jir_ca50ria0JTw=s4800-h400",
+  "armando": "https://lh3.googleusercontent.com/place-photos/AJRVUZOG33VLGs2n925vJkVuNkF9b1Z6majpwMy9fp757ENqR1O6SdKxJ417ZC7zmB05pA3AE8sKaEKvMF2W43kDsc-STbF-ZC6Ssa5ipjP8Dv6Ae3MWL9zBjDJyvtKGQtB8QVBF9XV6iYsIdaPYyUBHav2ZYg=s4800-h400",
+  "pantheon": "https://lh3.googleusercontent.com/place-photos/AJRVUZN1nAsFDWe-7GpQj8hHJPaYTemtT6oCnGdtzZAKZx_wuV1T8gNlWKjjTz9dW6EhLkltg_MerJnnbvsgXly1DK5ATgFF4EYm9UccX9G1-FLzj8JSdV4vkF7ViHGoJy6Tve5LEpxGH8elEQezkFY=s4800-h400",
+  "ilcapanno": "https://lh3.googleusercontent.com/places/ANXAkqHH5PDaRVqWzQgCT_1E72KogSHNsdZ7h_4zYv5gtvWFanePvAZWyD9bMyX-xrvL0uOiiDi4mdVNo2sz03SH7suXrRf3UHfLfUE=s4800-h400",
+  "luzzi": "https://lh3.googleusercontent.com/place-photos/AJRVUZNQAsDJ9-J8CWfvuKvMrODP0zA0o6sO_GW4MYNqEE-7WfIiEkrZCs2N7IrCgwb2oUNmdRuOsJlntfWLBjwemYfjOTP5XQ1vWI3R5U87vvQyICHb79X8wG3lk0rLB9-U0P42RDd8mRC9B9p0YkU=s4800-h400",
+  "giolitti": "https://lh3.googleusercontent.com/places/ANXAkqH0EbmVyMmrKZKqvzDzFMi5DRcvQxWeNbhwUNeHSep14EN1mt76SU6TBz_5CEU-eYtonAqhM0eqxvV49g4lWV3Sf1QCpvG3yG0=s4800-h400",
+  "villa_borghese": "https://lh3.googleusercontent.com/place-photos/AJRVUZNEsdeOgCQq9l6Y5aV5O1rxzt34iCGY1AsxBiQ97lP-CYHKPy6OIPT8TNziJExJ5kti-rmDC-s02kGNDELWHGLR5P3pS4WHK6_VMdsFuQrkBNK_iqaxV4R0ulJWyWQjtfqqFfP1VUQdeRtghQ=s4800-h400",
+  "drinkkong": "https://lh3.googleusercontent.com/places/ANXAkqGnpAlAn-d8W0Q0w5NBc7V9-AEy_JI3ZQf2otRikZ4tqRigQKfeFJIlthHUgpzYhoL1xMAzeovJYjni3UXBWuGPLX1SgLvHWtA=s4800-h400",
+  "vatican": "https://lh3.googleusercontent.com/place-photos/AJRVUZMzTxyDjQ5rZJsumZLG9wK-1lM-5-Vj-1tnmqjqix-NirfI69L2nZEWUSdQnSWqDSpNa67zg81MJUjEpkuJq5c0NZv_3ZVRQmszpP7pzOrWZgMUXgULXecEwC3JxHyxv34vDOBPIKNSZtgQwNA=s4800-h400",
+  "castroni": "https://lh3.googleusercontent.com/place-photos/AJRVUZPM4uXIku71ddbeaak1h7dojhMmXtCHJNt-JWUObU-SMWQBnqqYzJoV1k7SaO5PVedwMzF9vLgEPPBiX9N9r2smVXtIf_d6olgmj2Sz1IHBkKpu0jYk7T4ZUmiyx5Ohn15Ca5LSYhuSrqpPJnT4VL6zWA=s4800-h400",
+  "arlu": "https://lh3.googleusercontent.com/places/ANXAkqGdPdViOmjW0nOiI8tyfarAFG-a_hlJ4oRaIk-U9kPL2sIOXXf1owlM3uPvWKxOIvLJSJPnRxLEAl7EkT671SURr4clt0qVeWw=s4800-h400",
+  "derbelli": "https://lh3.googleusercontent.com/places/ANXAkqGK032AP-2HxByUe7pVJVifo9uMb5biFFdhXmmYf3oOkgz52vmaluMWqdi26jnaWxBtiqkbr9toXJqLBeekozko1jGkVbn2VmM=s4800-h400",
+  "old_bridge": "https://lh3.googleusercontent.com/places/ANXAkqEEO53gCmpo67APRGcqOkiXZOr2_nfQ_31SdK7kN5UMYC18k86Jmy1BTDMn9uibRl0ZyVpAxvI3tay8xywYnvw-6OGy3exlSrE=s4800-h400",
+  "200gradi": "https://lh3.googleusercontent.com/place-photos/AJRVUZMHd2X89t0WoGJvFuVjp8911ii5Cu1CYL4i3dBd45jXW69ONB1awN_Zv_pBN3hRG_5CZ4e-K4R0FSVyIQhmWPhILRbBsjHl6dIDSQ-eJbXPnBekuJV4Nkw334UckAK9QCitCdUuq7vIpTRUPAFGY3aD=s4800-h400",
+  "tonnarello": "https://lh3.googleusercontent.com/place-photos/AJRVUZP69cInnOeGEUQMJXDfyzB9mMZF0QRx1X3kjaupkZKoQc3YahVPH3PWl0n86xbmkrQJGtADV3jy0IMYWVSBHCBB95EDvU2GbvGc5nGtO1tayQTk3QUu7aNBnroPJ4HvOzejjAmC34FQoIxrNw=s4800-h400",
+  "fatamorgana": "https://lh3.googleusercontent.com/place-photos/AJRVUZNVXibpy5AEwSjJzZZQ93ZNw2lttcIIQqlXLo4uN5lDd4VVLOiKvP_JkS7i5OKhfBqDPyelXI10mIvstVST816z_M5BEhGUEoiNNN2zP1xYeW2BXyKtu_yvqrWPiep56lJdmXuCMHYXZBsE434=s4800-h400",
+  "labicocca": "https://lh3.googleusercontent.com/place-photos/AJRVUZOeCJ0LgaowjlHsMsr7He2XF5Hwjc5V0pUI4TsjvCED4wjt7v_dqk1xb5Tb-DNVE4dRrgCwRnu2WmlMIPhejA_0EjyWe7H4smcKKiziQxrjDdd80SME4WerzW9021hHK6aKJNednkWVFjP4Mg=s4800-h400"
+  };
+    const rawData = `accommodation|Casa Nanna Chic in Vatican|41.9104386|12.4538441|accommodation|Base|🏠|Via Andrea Doria 16, 00192 Roma|null|null|null|Via Andrea Doria 16, 00192 Roma|null
+vatican|Vatican Museums & Sistine Chapel|41.9064878|12.4536413|attraction|Mon 25|🏛️|Already booked. Arrive 30 min early.|https://www.museivaticani.va/|places/ChIJKcGbg2NgLxMRthZkUqDs4M8/photos/AU_ZVEGJW0WO513Gs96vmYXmjPEZ7ImzyxJrLOfQT9r6VDYUL29iU73bcgaVHD96zlexlWkf7OdFhFe9a1bq4D4MN6sJI2ZTIPr-bDU2D3v9T82AOlI2Uj6rYIQ9zMUn5r8IfHawH2yPJbsAJHE7DJGi-jNNQZvQU1V0TRufx_iR9CY0YbkFmGsh7GTZNs5xX9hjxvajGG4B_a7jESqJmbpeNpfe6HeBj9gi6KijDmWi5QI7o7lJ9F8icVfY0HLkX9NCk9KCjy8cEHcJ45hf3T0iBDOrUPgq8m4DZSbiNh0e76W4mZRrlyAw-f2vQyhDx3R6NIe3vsERtpxCSXLso7Krub647-1bfT_T8Y87ctFS6Xh1_RnTURvD0WSbjTr0vdj8RP6XlMGT_EiYvs3U-Yb_TqhOMarezQnS0cnjxpd2JSdYEevP|4.6|00120, Vatican City|Mon-Sat 8AM-8PM, Sun Closed
+st_peter|St Peter's Basilica|41.9021667|12.4539367|attraction|Mon 25|⛪|Free entry. Climb the dome!|https://www.basilicasanpietro.va/|places/ChIJWZsUt2FgLxMRg1KHzXfwS3I/photos/AU_ZVEFwVHXfUsF-sROTtMSOSisbi-8EHgPookrwFQC-n718AqVSiKyIkBpPb4rQzVcP5CJoZPUTl_722YwxQSgxTjVHON3yreXza63dwrVIuinl2DxtXHAGPtdipbrB1HfIxv-xaqlo1H_kNghPBGt5nWbmefSAF25PbyxaFeCnLda7S836cfIEPRdLskWkjowYc64ilu1bC3E7HdicJ-ipN_XHqDvdrhhPkwowH37xRK5MUNJ_jKU6-JBHA1s0P2tbovt0UQRBYygL5B6Sgg5drKKNqlQxbc0a8LkdBa64k1QOlCdWZYvjmOaxinQpPptE-DcdG5D1MAFaPpeH42qwnJTZshfXP0LqAczIE-_ZM2rXFK_5FRTI5wYzj1QljQfnQZAygY767A9XYWJ61Gl4wP7VWVL4uh0G3RXBs6THrfn_C3Y|4.8|Piazza San Pietro, 00120 Città del Vaticano|Daily 7:00 AM – 7:10 PM
+old_bridge|Gelateria Old Bridge|41.9064049|12.4563677|gelato|Mon 25|🍦|Viale dei Bastioni di Michelangelo 5. Open till 12:30 AM.|https://gelateriaoldbridge.com/|places/ChIJR8-sTmFgLxMRjTyHvM4nhtU/photos/AU_ZVEGDMQ58QyNmLPcrkNgpO8vPVaMlawg-_ot-zTH2EC3_jQkgPe6gpqf6APuRXClsUCAPh79mTiN7AzxwA2jyAqlWEUpbTwY0g1gEblbKyIbgSfZi0AGHunnojWQ3OW6LyD8Vkvfaft82AM1B64uQiC6ttQdF3FZ3y4RmbK-lmNi1CYFm57b8X-hXwPrQjFeX5Zpyz3RMPTPEtqU39jr7eoMYAvLRM7gtQ9rkb8stGDDi4zpYHSeLh6hFxRrayla_9GZz5YWA2aetPfEgOran88aXvsDaeuSfE9okQ1LiOgnM-g|4.6|Viale dei Bastioni di Michelangelo, 5, 00192 Roma|Daily 10:00 AM – 12:30 AM
+castroni|Caffè Castroni|41.9073023|12.4631731|bar|Mon 25|🍺|Via Cola di Rienzo 196. Iconic deli & caffè.|https://www.castronicoladirienzo.com/|places/ChIJv7LkTV5gLxMRBEUnhwi7rvU/photos/AU_ZVEHMqDf8Ki2RrcupOzN8k0jFGPyoqmchglWxJA8PKfWIMecg8pDcnw67lxMZhSVOQC4pJoruDtnuovEPhkPgoGsPQe7qb2gWqSifnlb-f_D3tQ3C9gsjwKfHtOrYNEVckP27fBfmDvUCIpaMZVPH9TpYJ7sNAr5l7H-srVTlf_DIB_WA4E3iytOakTC8-QnEKU9Zerm4wkQlLfXzwYDsCe6SO_KLnUkAtTbVFNIpx5PXaB4iOShZksRX-eBYRDR0GuQIW0jhXwu3fVfNoR3t_EgmSlnzUAnIORPfsQnMU-4RFmtRKLr6Utfb0l35iH0qr-km4vhWfh_ZMwWT07xFZLE-pc_Pw2lpowVBdb0pNmZUBk4PnWLYr1WJeAmaUGYVK9zQr3pSbkERNs_cmXETj1UPMPJccXw0o8i332to8w2AX02cSM0_xExhV9p_a-g0|4.6|Via Cola di Rienzo, 196/198, 00192 Roma|Mon-Sat 8AM-8PM, Sun 9:30AM-8PM
+200gradi|200 Gradi (cheaper dinner)|41.9064553|12.4565817|restaurant|Mon 25|🍕|Piazza del Risorgimento 3. Supplì & pizza.|https://www.duecentogradi.com/|places/ChIJaVa3SWFgLxMRoJDHWzGuMNs/photos/AU_ZVEHksFsaCDi-MDs1aQ6XLQ8TkXyNkSuTT-dD3YvAFG7lUUw8vFcvH9_JZgJzabpm1xXZ8UZqEAevQERN-GfxdnqB_fUVbVk2OZPQX_k2RUoxdEd0OFMkPIbkoyfkuHQc-HCkkK-Lw-zIl2jXrljpUt_spMihMySWPvHe69AmEq494aub8SG4nYq55z684B7Albc28IwHBBkcvO7j-3KUgnMDquF0674wX6qjWl9_TvdykT1iIJpnWHzUeVLNWHs-vsMhL0R-PBoaQJEuEiFlBapTMRQpZJ_ztcDN6uO0Uq4O6mFu64C7ljGd2bdQsECZvNQL63KmIk-CzmPW7mraHktSKwP5L6jtwd_qsCc67STLnXibAcZDBYiDPG9fEicbF5RMXc4AtPUZgtoRhLM6Vkqht8Uo1Nk6k4CRE4IDMLMPJ9RFp14Rd6ega8aog|4.6|Piazza del Risorgimento, 3, 00192 Roma|Mon-Thu 10:30AM-3AM, Fri-Sat 10:30AM-4AM, Sun 11AM-3AM
+arlu|Ristorante Arlù (nicer dinner)|41.9039232|12.4593663|restaurant|Mon 25|🍽️|Borgo Pio 135. Spaghetti alle vongole, fritto misto.|http://www.ristorantearlu.it/|places/ChIJ0c4JEmdgLxMRId4wASpe4YQ/photos/AU_ZVEHbT429IrJ-KNw61ehd4DJfEewvHeRI23vw1kXTCv3cftTRkgSMse8XP9gSjDq1aS3d9FrMS_W9WSi_qbTWdBM4qbr1AlfjKeoQm5cW4e8yjUZ9-pHdUw6spQQk7NxSrAVlYgwqNFNghH6-oBA45p_hTcYLoWXelTZkkF38Lm3QqNYlO0gdpQu4iu-0T8arz26nQM3zmRgb9Pd1pEE7kh38zy5RCrXEiFkPyZCNMljkDZdBvyyjxzoSxrgwgJqOuiEv0Seyexr95r2TRIE1NQOrJEAn2YcE6bhUi-BGEmKO8A|4.5|Borgo Pio, 135, 00193 Roma|Mon-Sat 11:30AM-10PM, Sun Closed
+pantheon|Pantheon|41.8986108|12.4768729|attraction|Tue 26|🏛️|Pre-book €5 tickets. Daily 9 AM–7 PM.|https://direzionemuseiroma.cultura.gov.it/pantheon/|places/ChIJqUCGZ09gLxMRLM42IPpl0co/photos/AU_ZVEEZ91gNEU6VQbGQSNF0PULiK2fqop3Jg0MuJ4sgHUSLVmGSrbFB2FsNycYCII_zC3ADbHuAn5XLkbqZptTwmWOnAbN5BW0mqU-HXqgNFLrFZZhPFfCLR7HNh2ySNcwrtB_jZzdPL_inPpohdyXzlqZ3Fi-DWwwMbVQ5fbv8GhkpYamwL_jf0nILlj48vnsYdIdGhd0eaRZ2J5YifJ3gTwi-3H202vvJKHHgkKamaGAmymr_hzdNZnI3g_euLwqUk9ngrO1-iCZXQj1BQlLqCZ3fTgLcT1CLhT-7DVyQ7MZ1OJX0ZFPrphydKZ7In5TGVCutWCa1nI6yReCPG2zfhjalvG-0NVU7cM6gIMb-PGpTNHQcfYDq0RLeAXvrQH5voNwVl8UZfi9xgtRMA9AzgDCnOqH0aMeZ-LcuSdcMcNtJhP7P|4.8|Piazza della Rotonda, 00186 Roma|Daily 9:00 AM – 7:00 PM
+trevi|Trevi Fountain|41.9009325|12.483313|attraction|Tue 26|⛲|Free. Throw a coin!|https://fontanaditrevi.roma.it/|places/ChIJ1UCDJ1NgLxMRtrsCzOHxdvY/photos/AU_ZVEEHwnEt7zGNw6buvkJou5upQTu_LlXLaoCjcG2dOTorUrNbnMXXoe1bvxpXOHr7zrr5UGYYLXwynzMSN-NkeMxr1bT8iFQad36wCChyHCV0o3d-_AHeiaXS9c1Z9bCpIgVuUAJOeeeKoapElDrU7x-BVMzGeYoX47REKzzKAGzrI7nlYqpij3Sq-khqCYLgIplslArzBmq8bfdDqfswHzh1XbRw78xPyOXRDoDw5G9oHvnxaF88b7I9FbF25-8U8SggBeahWqslwM3t9kL6duu9QcXneGtEyyBB_G8-2_aPaSGhwq8pCgxstTowt9jp6FSzbLUXWzO6ErOwvfCD7qT2Gq2uwJH4qo0GtxcOYWgxSmYOR6APZ0-7lghyAilA3PQL-f-uuRvGDF9VsHJRbjv8ULaOqa7h7X9z4swZWcQXnCIcTN-hQX8CllWWHQ|4.7|Piazza di Trevi, 00187 Roma|Mon & Fri 11:30AM-10PM, Tue-Thu & Sat-Sun 9AM-10PM
+santeustachio|Sant'Eustachio Caffè|41.8982749|12.4754254|bar|Tue 26|☕|Piazza S. Eustachio 82. Rome's most famous coffee.|https://caffesanteustachio.com/|places/ChIJF4C_0k9gLxMR2LL_-I4HSWU/photos/AU_ZVEHPqGHQHK0ZdQB3_R0YC-y8WKxX8y2fgivUOokDU5nLQsYN8LQ5sQaWJkko7flzrt2do03WoB7kVl9P2KgGRK8vKi-eBm075mrI_6TmO6cGrkZ7h9bJl9eW-tPA6wZqhLSF0-S7WqZ0_zxqE-IgbxpamOOg8h3V3jAjdyJRt2BVBeNchsCmjQP56rsawhnuWL9UqVL00tLmenzT-CJ-Msos7YNUvo0b51bZXOgDftuhXidQAEjb88XjG178upW0lJrAQFd80nhT7yT4w3fSP2jBohekerAnCm7x9fewmAaERg|4.1|Piazza di S. Eustachio, 82, 00186 Roma|Mon-Fri 7:30AM-midnight, Sat till 1AM, Sun till midnight
+barnum|Barnum Roma (cheaper lunch)|41.8970566|12.469997|restaurant|Tue 26|🥗|Via del Pellegrino 87. Salads, bowls, sandwiches.|https://www.barnumroma.com/|places/ChIJU6OZqUVgLxMRW52v7Rh4pvw/photos/AU_ZVEFg-HzxnDA9czHaVfn04sxWY2mQdnYKcFzKbSF_iDBZV--dqBBR_rbA_McgVzREggXCQDXEvKgJE_uhzctqGLr9vsK_HplSF-Y779JsO00BYQapvzHL-4_J1t3ySdwIBjD6STJdzYlNhy0ClW0X63TabZlDlZ1zUdWPGLmj_PaHdUXBpYfoLGf3sDYwBVDxOWPbvF7L3xTLWA63OabxhVD1wORurbaJzxYmdX9pg0chQGSwWyFKWIxgSn2BJAsZegMkLbOOvqYKt1fG35MfyADjAuMSF3C1qFMOpXbfy-SgGAFDFJDiHWucOJh7HUW3zEDKtqIcrZ-CdrpXd5zvBld4p4dp858pPTvnwdthrtFEBHNHoXsNhFYvhbziOIk3780_IOiAmiXRTLDd9GPsWAFx8Jmj_jL_1zvYZhI8T79F6UkFwr_t9ilnMD2d4oi4|4.6|Via del Pellegrino, 87, 00186 Roma|Daily 8:00 AM – 3:30 PM
+armando|Armando al Pantheon (nicer lunch)|41.8990932|12.4762429|restaurant|Tue 26|🍝|Salita de' Crescenzi 31. Book ahead.|https://www.armandoalpantheon.it/|places/ChIJcwb92FFgLxMR_nDe5ODn_ZE/photos/AU_ZVEGqWtwfqtZQSxlGQtSNZACt8cFkzacigY7o5DU_L2YiRtIo4-TD_1Mx8SHP7F4bjjgexyo69IwlE9-P53sBeY6ARDxz5KPugkacpK_TSQk9WYqaYmHqZbvvwRQhAXpJbur1j7pyYFqugauWi7I8mGVbn81C8PmCA0weZyc1ivGsht8CGaf4rE8sDOU_Yo1VzNK3ayBTj_g56PzYckzlfsyUTEh0th0fx-lQ8guHq87JdQ-N8mOnFjcAP3HVfSw1tOP3yIxnB6l4EvbQ_4CRk6hKkqeO9pi7GCmokjo2xpUg0wQi0iHJsQSooBHA7rN8G_QZ0QZrqlwpM1UvwOLufPKEYjK0HtYoDvNDjX_mMBe0S2FmcjDEN7oPdc0FcWCJDvOCL835XFCCUIITZemRHVvQuxaNlbAeb1oU5ceGVTxitQpA_qE0esu1TkgtYODE|4.3|Salita de' Crescenzi, 31, 00186 Roma|Mon-Fri 12:30-3PM & 6-11PM, Sat 12:30-3PM, Sun Closed
+giolitti|Giolitti|41.9010245|12.4772026|gelato|Tue 26|🍦|Via degli Uffici del Vicario 40. Since 1900.|http://www.giolitti.it/|places/ChIJe3P6nFFgLxMRB4GPokAKYTg/photos/AU_ZVEGteCx7_rLtXy_xLf-dj4f02l77dE3XmCJPGL01Em4kW4UiZjRS9qZN594n-dUCnbfWNZjHjBKbdw5RiQjOT5eCv26CbUwGZmRrauHG0Fk2H-tEGfOGV_IaIgLNlG020F7WK6sIrEQ3EcJioGCvpvdms3kovkoaMBZpKETFVNlMnrt8Mu9HExvn7-QtKHiS0Cde4JIIhDA9fthNNqldpd9UXSfq_ILdlWF5Vd63LxzSRoMYzjw9RHlmQ-frpQKxytHU1sCl7WzVvE2qjOqH9Mf06xVDYKyEd46mFj69aahVSQ|4.4|Via degli Uffici del Vicario, 40, 00186 Roma|Daily 7:30 AM – midnight
+villa_borghese|Villa Borghese Gardens|41.9138782|12.4853818|attraction|Tue 26|🌳|REST AFTERNOON. Bikes, boats, shade.|https://www.sovraintendenzaroma.it/i_luoghi/ville_e_parchi_storici/ville_dei_nobili/villa_borghese|places/ChIJj1M8HQJhLxMRRI6D_z18Pes/photos/AU_ZVEGG3b26iKTy9vMzYOtkvVAQdP-yUI4rrySdJajQUeDT7iovaqlmeiB3At5UuFZw16SBmJf5KW000JjS7ZQlbJL-mAtBRrX8X42tq2K_HHkQ-vu3iH0Wbwmo4XjBzP2UmGzmOovMakSGfR2SezkZ_Ji3bhzaifTdsg88nWuq9J_L3av7RdpajPVgZwjtGEucN8ZSrTwym_7Qn2UqVa3IgX693jRF132nOVg_OSjVZXtADd4Ul4tmnU4L3JjAsp01SXEPfnIYT5aJ5yZX98QwmyalNb10aT7mE1ua1GskJoCTra0VsMySyeavSRzPe4VWl26CO4gWHQ-hANfQobsCKVlhI50jC5GdnN-tOZdFsYCiZmCtFbE2OuRwNcnJUX7PTObfBv4xgOZ9MWNxpPUax_EWMuf0ZDPeICtV5jHij5o6mQ|4.6|00197 Rome|Hours vary by attraction
+montecarlo|Pizzeria La Montecarlo (cheaper)|41.897592|12.4707729|restaurant|Tue 26|🍕|Vicolo Savelli 13. Cash only. No bookings.|https://www.lamontecarlo.it/|places/ChIJkf4uDEVgLxMRmMj0xuafWsc/photos/AU_ZVEGoxxxVWrACW7IG10IfMTEquyFbAZOu1HV-Ks_LzlVtWe9QEIGH3rpJMUFW-NB-h8D4xt7R6-iunYiT68WgmpdNUJO8cKDee0XhmgEHMmOpNADk9npu2SOGyVCyWi-b0TMzCDHtO67ksW-exGBRfXXifuNGgTnIrhaZQRkii_VF7TPm41bTDVCAznTOGSm66RIUh66KGaXUU0oUh8tlxovyGdz5G9t-tPslw2EqRyloRs9a6bUSa9BAaRmvbeV3ZfKa542-4M5M3gWRLaEeoMUrCoUi3EaIuHW0_TTpPLOZ6VUs2I63yxADS_W6a_r0E79AbCR4mdmRU5vrJAmHCckm7PiFc_pK3bVnj5DgkQKP1u7LIjHuzb2eHyYoNpj4OE4BOlc-2yVyzRYM53j3foH3pfVJBL2MAwl-oGdStBgvibs|4.0|Vicolo Savelli, 13, 00186 Roma|Mon Closed, Tue-Sun noon-midnight
+tonnarello|Tonnarello (nicer)|41.889804|12.4693004|restaurant|Tue 26|🍝|Via della Paglia 1. Queue early.|https://tonnarello.it/|places/ChIJVTkQgThgLxMRWM0saoiZzkA/photos/AU_ZVEH7cNVwitIFJnKAwb-NOSgCXGvVpw8m84P9JWenYztg2brwGQrvNeuNgqimntTJqz8mABwD9tAQ-sccpxkvjsOdu5Oa8Cu6XGo5SSlREkgbmzAtr2wRTMsQbG8-6Veeft2JJGFluzQfRYPX9Ddm9e0dYlI3OV0-dJmbb14vOBb0_3dnWHwkoI8SHdwPu3O6w1824neLy4l0dMSncrdvxsIgMBHR2MBHTKZUF2Ponm4Fcs1zPP67wveNP5NrKYlX92ATYkfS5FZsGdTqdK_tpwBqTu32GwPg3iUxwPXycT4llJvE2YaaEZP1xSlkNvhm0a-E_00vRgouSHvnF3N5Z80Q8_fSnrSJc0OqWctb3oUfp03qRwppvmFOZ3-n_ABxgA2tSRzZLhVIBmGM30jxlVME7N_9OWqBW8EXdoQA_2xRQ|4.7|V. della Paglia, 1/2/3, 00153 Roma|Daily 11:30 AM – 11:00 PM
+colosseum|Colosseum|41.8902102|12.4922309|attraction|Wed 27|🏟️|BOOK NOW. Combined ticket.|https://ticketing.colosseo.it/|places/ChIJrRMgU7ZhLxMRxAOFkC7I8Sg/photos/AU_ZVEHn3HzQv9xlVigq5iwFbsqedLO9UFST8b9CwJN7hlZm7jo6e6UmTEbZNQAsoqs6_Q41gcGz4r60uF5DputN-mBHzJV-yzPmg0hQEHqJJSCn0A92gB0UQNfcywPkmBPlBLcgBKn3FYmQ0X3v_ykw_Eg2O9X_gsuBy5lyp5cILt6WDZHEPrUgm4JMEe8o2bs41tNCvXb8d0lgbLBdBOVhFTVUIgDsABZKz6mjXI85RP1dspEkUZNdE2OUcg6Zq1yJd4tsNuN8FT6Ex2-eZZ15OYq7IzNRlycS0FYLOu6Zu50Hjr6bjUt2lLcy3E51_OqDEyFV0PAdwOOGA_sUdvSwElIoyQvExmvoU-Q25OO9W8ksu9pNBTZHIrLOPEaHeEoZMcQWvjrtkz9FRFEGfiRGIf5O-tNDQMxIH2czccBLd2m3Bw|4.8|P.za del Colosseo, 1, 00184 Roma|Daily 8:30 AM – 4:30 PM
+roman_forum|Roman Forum|41.8920906|12.4864378|attraction|Wed 27|🏛️|Same ticket as Colosseum. 1.5–2 hours.|https://colosseo.it/area/foro-romano/|places/ChIJ782pg7NhLxMR5n3swAdAkfo/photos/AU_ZVEEtCk0fiKSyoMmbpMrDWRhAQnAp70ggAiunLbWNmb7DdwUhTD7T_f7dXA0k1xWiSCqOZu3kiVExmNhQnNUhkze1mFKWrWbCx76LRaM9xk5nClYNjDdD_ad760FlUnYYzdEJyIaOBG6QPz3oIrJ-7gYxuEok3ZleqRHFgnTpxESW9RrpUx5nSG1rJkda3Gt1kMpYFSAA3PYhtxboAwpU_IdxeGrLk5mtPDbEg00hLC5yAZVUCsOWu-CM8944mzEamVtsvknvotugmOWdP_uyA7g45_o4QCverESHoB0Y-1rtTb_zCN9bzHEKjZr6dwgR9zrHVlFlN9R2mQo9FXy0EFiS0hWRMUt3x3cSVuiMI_btgV6vQQSsoFQfyr9gyKf-x6skk_RBaryekHySEmoUvWIS5QFYCvivEAnBZ4GTlUaRFA|4.8|00186 Rome|Daily 9:00 AM – 4:30 PM
+palatine|Palatine Hill|41.8886559|12.4875481|attraction|Wed 27|🏔️|Best views. Less crowded.|https://ticketing.colosseo.it/|places/ChIJowJff7VhLxMRLmHQKoSniFE/photos/AU_ZVEH8gUn3uG9yF1DjNj5bHTC3fLwcMYY1apFXb06UiZFTKDbNK2_9G5gjQOSB5hxXoeAw2cNFHCnKOkaD6iDZqvpvFSXWlHCCmhqXcMou4AwpzkXa9wZfHaWAq7EFt9B_HvzegGHblVK6vaovRJO9_2jGSEseTpId_JRCSSOZPhAD1aLBaEWC-w7SgegTw92Qv2uoZtD6fT1nyeRO6nZ7jvZbgkFL-zNax-YPeMtNjO6h9QUh8Hf0A9UqMO6NEpqANy3JlNere8OXsCeVoj6XuoCuJcR-jwRSUQRd63f2hR6MjrMIR_Q_Y8Eu8he5x3LMSXzaFWZrYG6WkUmMO9b-FVnNLlWfqgdIbE4hR6NW3WqzsMwDbKQZnfvhODTgE-JiUEQd6n3wFUDUMc-GKYeUQtCaAVNB4UZO1ZTFM4GpgaRnvO5I|4.7|Via di S. Gregorio, 30, 00186 Roma|Daily 9:00 AM – 4:30 PM
+luzzi|Trattoria Luzzi (cheaper lunch)|41.8893098|12.4966286|restaurant|Wed 27|🍕|Via Celimontana 1. Opposite Colosseum.|https://www.trattorialuzzi.it/|places/ChIJC2NPNbhhLxMRf0qXePNRGn4/photos/AU_ZVEGaEs3ZguUnwbhxfDBSaKP2JrQbLxaNqkp15kay63t8USD-XsnZ13q63i2q5dtd12bRaucWS24BL-zKIQr0_xt5g9vk_bHkbSr0fUbdkmx5_mozCUKWw9BsQIVrLzZd8YeGk42B4tAi1qeWWD7c7BFoeuQA52EAxmyc2tgT-Y7agXYFLQQtDBXGcslCBgrG2gZ0yJMkuh5awX4ipi9YjbUXPq0VVLJllNW_UGMlX8Ut_TocnfGb9fsIQpJ8bJFuv0h96I8nN-IQV-0aIaTUjMrjtZkXF4-8xiuUTxwJWgqXLh9Cs7q-tzA72XF3er8wmAe8mgzBe-YvAxh1JduAvRvs8hFHsv6Oj9752MTKN2HSF8AR8dk5JhumlXi4CLHmwIcF-2Iu0d5Ya7gFnf_3OUqi5pJsbCh_hdsuh-X_FYO_WisJ|4.1|Via Celimontana, 1, 00184 Roma|Daily noon – midnight
+taverna|La Taverna dei Fori Imperiali (nicer)|41.8940615|12.4884778|restaurant|Wed 27|🍝|Via Madonna dei Monti 9. Hidden garden.|https://www.latavernadeiforiimperiali.com/|places/ChIJXdzO3LNhLxMRtdzzdg7hqW8/photos/AU_ZVEF3iHsZ-IMPMb1lYxkwc6t84gx1CNBOP3483XsNG9JUUmr6tQF85ZUf77laSTRJwagFF3urgj8ZEmnJWoY2V3a2qQYOGIPHEltrvpKeaENi3-jKCS8-2esRpUn2BEE1bVKkyRaVNrejsmK5a4KpHjV0ZbvhpfrO_zFdFgl1Lcsnl1hCH5SCTorMGVhhP7MRYTKwLqGQAx17t_-FvBwW64rQF1PVf7R_xU4uvstVLBbR-aixDpyK_lS_-OMyaX8tpIX_Jsks4qZbMlte-X89XpQHW643xkWQODMHOsIJgsypTQ|4.4|Via della Madonna dei Monti, 9, 00184 Roma|Mon, Wed-Sun 12:30-3PM & 7:30-10:30PM, Tue Closed
+fatamorgana|Fatamorgana Gelateria|41.8956656|12.4932505|gelato|Wed 27|🍦|Piazza degli Zingari 5. Creative flavours.|http://www.gelateriafatamorgana.com/|places/ChIJk76GTrBhLxMRI8p6TBaZ8e8/photos/AU_ZVEHs5R6V7moa-drdOURFbjBAHQXyVBdq4R4feGdVZTj3DmEcnZdUpX0sYYbsIap4ta_tlr69lLbsM2_I_Vqhj2Yrj0R64RqSravtXVYw1AzwrtwPFsgl7G04QWGL9Xl11OLFIm2Nb3BWrjUhedVIIeBGFA7tcXW1pSY4XKakr-2PrYkLCPAqy8Kb4qW_jsnrMzIqQsrD9fVD5eNWkULXuHIVKb-2IOtt4EZE19GdaDHbx-7zW28RZsBBx7fcVwj3bz_LlUthmIQg9M1gnXXa6GTpy1wvpGq2-BVn_2lvP_7-uTvmfXJJYw6nWc81pKipZ1EqH1KGsB1duwyNC_Y-rZ6VDATDmOcoNaGNAwWWSVp8YEennxnA2YRr-HvBYXvSV0gaUdsVMhBF1XY7j2Js8bAmVY4MthfBvEq5QyMn66lOzCIO|4.4|P.za degli Zingari, 5, 00184 Roma|Mon-Thu 1:30-9:30PM, Fri-Sat 1:30-10:30PM, Sun 1:30-9:30PM
+drinkkong|Drink Kong|41.8951585|12.497966|bar|Wed 27|🍸|Piazza S. Martino Ai Monti 8. Cool cocktail bar.|http://www.drinkkong.com/|places/ChIJf3VE-7xhLxMRnMf_uACwlXc/photos/AU_ZVEF-M7biqinX7m6UUY05tf1yuWkgdtpoMtUgxCkRaO-h3Djf-8K-7iiRJdFrmMlvtFW3Sjk4JLg7PzzyQrcWWqtNanQk5CV05iqw0vUe7GbNZCEGd82LzkFRvIyHqKN9swPQ1QNjCXOe--2LbWjZu-YRVgfpci_U5aVY-fvuajjE9qEYlWG_KPEwkjHrSYeL48D984rtTM0Wlmb7cGN_kdHGogxabIP1IOnTYSIGhW0JPhQp4Bn8oKXVn9aCtV1NSYGA5ZBxUtD3CfI4zgqGqZSuDaNUMms4fXC39UaE1z0gPA|4.3|Piazza di S. Martino Ai Monti, 8, 00184 Roma|Daily 6:30 PM – 2:00 AM
+flavio|Flavio al Velavevodetto (nicer)|41.8765558|12.4760277|restaurant|Wed 27|🍽️|Via Monte Testaccio 97. Ancient amphorae hill.|https://www.ristorantevelavevodetto.it/ristoranti/roma-testaccio/|places/ChIJIdoK9y5gLxMR3ocPcmakVLA/photos/AU_ZVEHZ_wNWBQtSRgu0Rwl6pzq9zHVBYHzlS2ngAxnwFV9t2di-OiF-AeQM2-Pk-E5k0MJOLCnlPtdIRO73nnlPkMx6vnuaNyPQ_HlOjIKMficT8ElhrN1HZq6LqaHmVqkW4qDT040g1qDNLfteU-M7vNDGbHIBnfmLNgEkcPxxNDBWXLax1u0w2SxQtpqOs8LEXq8ZRyL_qbc06zQiMVoSl7LxbvL3es2adw7HfXPH4H7cVUXQVs6ChlLOSd-n71xRTqa_fsOjijpwYnpITimeKKw2JlmrFQ3SNSsCy1vl0XDjUA|4.2|Via di Monte Testaccio, 97, 00153 Roma|Daily 12:30-3PM & 7:30-11PM
+ilcapanno|Il Capanno Beach Club|41.7252316|12.2879118|beach|Thu 28|🏖️|Piazzale Magellano 41. Family-friendly.|https://www.capannobeachclub.it/|places/ChIJWbSXk9rvJRMRE9mSw5wESJ0/photos/AU_ZVEF04qb6fy3wz7KMJ8IrtiOKapjgXUj4ELo4Ld_urJLxHp2iKNPKWC8Tjg7hemaqnNVN5bLBIN2FCRK7NADh_-T6TUF_jOfNpZ0ZlXQdaiy42TwCjRrVi9RsOCO5vzzr1-qRl5oP-pyqQlBawpXi7iLTR5UMLxqGZm0Lnohl5BMKUDVKYIOxvmlE8mnQsj6VPWajs3GMQH3dxH_BBffKdUpUmV8EoPj-s5Spcw9eLUD39coqFgf1KF9YdFd2gJHy6WF9XNnI4VWswAxf4cu3TuHTkZ3S03UgDcinPcb0JmOHQg|4.1|Piazzale Magellano, 41, 00122 Roma|Mon-Fri 8:15AM-7PM, Sat-Sun 8:15AM-8PM
+labicocca|La Bicocca Beach Club|41.7074066|12.3329341|beach|Thu 28|🏖️|Lungomare Vespucci 80. Restaurant on site.|http://www.stabilimentolabicocca.it/|places/ChIJD1qUi3LuJRMRGNv8_1fVzHc/photos/AU_ZVEGCZXIV7aHdBxmrFazR_S8GB_1fAa0bkIHfMLhGKsIRwTVljPsOeaz5gFLkcj5HAcv11x5jN4OT5UfIrKsVqB-GC5_wWOrYeSyDcxGwYkjoGdL1SyFINfGNobyyErO2EJI9FbdktYBmYoaCq1s5-ybBzF9lXmtp6mH2dY3TC0EX3NeYB1pCaSBPYR5rJz6FAA2yJEtDZaVPFTSPJpWygWg8Tf7V351_C45og3ePsoYP9nXawpzmxskqyQiD2T7mnfOdlqla1mAO5MJi_W0C28SzrhJ-Ljbiula2uurxRLt03LhkgTcL67WX-qAxkRiSL01L41R4rdOkfgJi1Vu1006lor_zdhsCikupfD2LNtZNmI13xooEuP2X405X0bW5RbeTP9iZNrr4yXzdS6c356PNma1H7B7hj2RfPCfcjb0sTQ|4.2|Lungomare Amerigo Vespucci, 80, 00122 Lido di Ostia|Daily 9:00 AM – 7:00 PM
+friggitoria|La Friggitoria (cheaper lunch)|41.7323996|12.2767924|restaurant|Thu 28|🐟|Corso Duca di Genova 8a. Fried seafood.|http://www.lafriggitoria.com/|places/ChIJB8huY-DvJRMRKiAS-85-RUk/photos/AU_ZVEECgVXQX-D49aLSHi0kEtOMcRzUvEvpt-BlqfaL2lMu2Eb-8DuccorjMYGBGAvWKHPxZzM4BLX3Pv5O5UkIqpWEYLaWtJGI25i_FsheJUH8FBxBGzHzFaAsa3OC_dmDDbIavDFBSuUAEUvIS55rXtG-n0uKKi-luSc3nBuix4oTSn_2B9Zzui1SwhBHxmBesEoKrUqhlQ-kA1YNafSk9cUZ4y9o615qMws9FvJ6PwVEUmz0kBJJjQ2ei-sJ-bX0GyxPvTkf6lrQvTzKbASswdXbRwAYUXb7S5Wp982f26C5og|4.5|Corso Duca di Genova, 8a, 00121 Lido di Ostia|Mon-Thu 11:30AM-9:30PM, Fri-Sun 11:30AM-10PM
+trailgrano|Tra il Grano e il Mare (nicer)|41.7298551|12.2852275|restaurant|Thu 28|🍽️|Viale del Lido 43/b. Proper seafood.|http://www.ristorantetrailgranoeilmare.com/|places/ChIJ57QeE9nvJRMR0BgSnctKMjo/photos/AU_ZVEEASHz_3wtdjtrfMUBuOnvEXXRFOYis58tHskrs1P3bMoTXvkV9pGBZMMW6llKqNFkz0ttb1yBcaa_M2V66M3A1k6z_Qa8xpwbdOQOJthrfmoHQSiiuykkA_xmnw58a2gSBJro4w-46hLMz_9oMzvDwiC1kvf_i1h0UfLdQdDwVR-SJ9a9ZBKE_qLU0Pae_3pnOG0bcmlsUBovzDStUpHi4_3mH1TMqzNjiGR6vDRpGuZYtrTYGfhtsOaHYJ4HO90X9ffhqeKhTuYmWF6D7omQAZn7eXTLnk8jg-SQrsawRe3U3feKzNUIsQ3O_FkyeHVH6F0WHDkgNIOBoNYUM-jKQOZQAtau0EcZB9W9zjabl7-N7fp6UqzvpXfemk9aTvVEmu4q-_f8HZoUoQuBvc4xiwRmcvyMwsnzB-I3NqOPqLQ|4.2|Viale del Lido, 43/b, 00122 Lido di Ostia|Daily 12-3PM & 7-11PM
+daenzo|Da Enzo al 29 (cheaper dinner)|41.8880847|12.4778554|restaurant|Thu 28|🍝|Via dei Vascellari 29. Cash only.|http://www.daenzoal29.com/|places/ChIJfy613ThgLxMR-Kr1iDROgrU/photos/AU_ZVEGiMD2PBOJa6quvFuKskTPSJ8pIdlR1AieDe4owT7YPHLfzZLDJCL-oMdI0_dSvgd1MP4vNaCEg-hOtEvJD6nFjWVEEoex6C0f8PiP3lbTGQOH8T3btcHcTeDgyPep2RY_nvhbO0NgpSMIKjwxSGG7oFZbK0I_gXBYWX8zR-Nx3K6_vSe5yF29EVoXcROlz4xPDeCdisVIicNMjoK71j641Lshf8XdfU41zKEkGEx9tGH9FHjFZxUXWlTZL0LSEAmSaOVYnmvz0dPReCftQQ2j2Ti6xT6CX0X1Fvo-83VasRvgjMz9HOD6jbOA2-QF0-6u5mo3UJz62hm8S8mD41c5s4QaP5oi1a-h-uZm0senM3ZB6Wn8jWmsGhD9OMqKiw_rydcFQFHzCfTA6wlbeccJG7_ufA6IfCwuSfaDdfNIJeg|4.3|Via dei Vascellari, 29, 00153 Roma|Mon-Sat 12-3PM & 6:30-10:30PM, Sun Closed
+derbelli|Osteria Der Belli (nicer)|41.8898728|12.4707929|restaurant|Thu 28|🍽️|Piazza Sant'Apollonia 11. Piazza setting.|https://ostepercaso.com/osteria-der-belli/|places/ChIJrUlUFithLxMRrBCEyL5BUfA/photos/AU_ZVEG6B2qOIXM15sHV0-AFEAwQIGsZGBGVwByzGqdKWjK7Wwtjhg7g1VIwa1owMXblfeIwCS1dOQs_8xICi5knpkH-4b33q4ofT1Sk8Gps5k4_DGwipfN9vTOuE5lRNVgb1aK2-Xqj-jjHSQYTOAFHORww9pUAdpfWiTxBPlC13ow-FReY3kXDkQgyH0nydN7HPQtV8VVOq8nw-iTcwC7tj9jZYTGlgLSH-uuBV-xOldqJ3opbHebDXM7wcJc_IxkSCN3YivoL05HGAcSG0_mzncdD8hz5tio-mAq0Jhp67XzcSQ|4.3|P.za di Sant'Apollonia, 11, 00153 Roma|Daily noon – 11:00 PM`;
+    const nearbyDiningData = `ChIJk9b_C0lhLxMRVZU0LFFikiQ|Tonnarello San Pietro|41.9048543|12.4589588|4.8|££|Via del Mascherino, 80, 00193 Roma RM, Italy|https://www.tonnarellosanpietro.it/|Monday: 9:00 AM – 11:00 PM | Tuesday: 9:00 AM – 11:00 PM | Wednesday: 9:00 AM – 11:00 PM | Thursday: 9:00 AM – 11:00 PM | Friday: 9:00 AM – 11:00 PM | Saturday: 9:00 AM – 11:00 PM | Sunday: 9:00 AM – 11:00 PM
+ChIJvbFqxmNgLxMR2CDwjXDxTUI|Caffè Delle Commari|41.908024|12.4540957|4.8|Unknown|Via Santamaura, 22, 00192 Roma RM, Italy|https://social.quandoo.com/en/groups/caffe-delle-comari-roma-92650|Monday: 6:30 AM – 10:00 PM | Tuesday: 6:30 AM – 10:00 PM | Wednesday: 6:30 AM – 10:00 PM | Thursday: 6:30 AM – 10:00 PM | Friday: 6:30 AM – 10:30 PM | Saturday: 6:30 AM – 10:30 PM | Sunday: 7:00 AM – 10:00 PM
+ChIJvXHn32ZgLxMRm_G_okClNeE|Pastasciutta|41.9046721|12.458083799999999|4.7|£|Via delle Grazie, 5, 00193 Roma RM, Italy|http://www.pastasciuttaroma.it/|Monday: 10:00 AM – 10:00 PM | Tuesday: 10:00 AM – 10:00 PM | Wednesday: 10:00 AM – 10:00 PM | Thursday: 10:00 AM – 10:00 PM | Friday: 10:00 AM – 10:00 PM | Saturday: 10:00 AM – 10:00 PM | Sunday: 10:00 AM – 10:00 PM
+ChIJK9t532BgLxMR_Dw88r_MGSU|Pinsa 'mpò - pinseria romana a roma prati vaticano|41.9068661|12.458185799999999|4.7|£|Via dei Gracchi, 7, 00192 Roma RM, Italy|http://pinsampo.it/|Monday: 10:30 AM – 9:00 PM | Tuesday: 10:30 AM – 9:00 PM | Wednesday: 10:30 AM – 9:00 PM | Thursday: 10:30 AM – 9:00 PM | Friday: 10:30 AM – 9:30 PM | Saturday: 10:30 AM – 9:30 PM | Sunday: Closed
+ChIJdZNuZ2BgLxMROoRffR51-VY|Osteria Ragno d'oro|41.90863890000001|12.4596208|4.6|££|Via Silla, 26, 00192 Roma RM, Italy|https://www.ragnodoro.it/|Monday: 7:00 – 11:00 PM | Tuesday: 12:30 – 3:00 PM, 7:00 – 11:00 PM | Wednesday: 12:30 – 3:00 PM, 7:00 – 11:00 PM | Thursday: 12:30 – 3:00 PM, 7:00 – 11:00 PM | Friday: 12:30 – 3:00 PM, 7:00 – 11:00 PM | Saturday: 12:30 – 3:00 PM, 7:00 – 11:00 PM | Sunday: Closed
+ChIJaVa3SWFgLxMRoJDHWzGuMNs|200 Gradi|41.9064553|12.4565817|4.6|££|Piazza del Risorgimento, 3, 00192 Roma RM, Italy|https://www.duecentogradi.com/|Monday: 10:30 AM – 3:00 AM | Tuesday: 10:30 AM – 3:00 AM | Wednesday: 10:30 AM – 3:00 AM | Thursday: 10:30 AM – 3:00 AM | Friday: 10:30 AM – 4:00 AM | Saturday: 10:30 AM – 4:00 AM | Sunday: 11:00 AM – 3:00 AM
+ChIJdfXYwGNgLxMR-2e_sz72n04|Museum Restaurant|41.9076884|12.4539457|4.6|£|Via Santamaura, 5, 00192 Roma RM, Italy|https://m.facebook.com/pages/Ristorante-ai-Musei-Di-Giulio-Massa/444631972311066|Monday: 11:30 AM – 5:00 PM | Tuesday: 11:30 AM – 5:00 PM | Wednesday: 11:30 AM – 5:00 PM | Thursday: 11:30 AM – 5:00 PM | Friday: 11:30 AM – 5:00 PM | Saturday: 11:30 AM – 5:00 PM | Sunday: Closed
+ChIJo-1DkPZhLxMRWm9ty5GH6Mc|Jollibee Roma|41.908395899999995|12.457803199999999|4.5|Unknown|Via Ottaviano, 83, 00192 Roma RM, Italy|http://www.jollibee-italia.it/|Monday: 10:00 AM – 10:00 PM | Tuesday: 10:00 AM – 10:00 PM | Wednesday: 10:00 AM – 10:00 PM | Thursday: 10:00 AM – 10:00 PM | Friday: 10:00 AM – 10:00 PM | Saturday: 10:00 AM – 10:00 PM | Sunday: 10:00 AM – 10:00 PM
+ChIJ0y9zzWBgLxMRMvDSjx72Ze8|La Soffitta Renovatio|41.90591|12.4590061|4.5|££|Piazza del Risorgimento, 46/a, 00192 Roma RM, Italy|http://www.lasoffittarenovatio.com/|Monday: 11:30 AM – 11:30 PM | Tuesday: 11:30 AM – 11:30 PM | Wednesday: 11:30 AM – 11:30 PM | Thursday: 11:30 AM – 11:30 PM | Friday: 11:30 AM – 11:30 PM | Saturday: 11:30 AM – 11:30 PM | Sunday: 11:30 AM – 11:30 PM
+ChIJ1Y4tkLFhLxMR81tVajkUTb4|Caligola Osteria Sincera|41.9098922|12.455217999999999|4.5|££|Via Leone IV, 123, 00192 Roma RM, Italy|https://www.caligolaosteriasincera.it/|Monday: 12:00 PM – 12:00 AM | Tuesday: 12:00 PM – 12:00 AM | Wednesday: 12:00 PM – 12:00 AM | Thursday: 12:00 PM – 12:00 AM | Friday: 12:00 PM – 12:00 AM | Saturday: 12:00 PM – 12:00 AM | Sunday: 12:00 PM – 12:00 AM`;
+    const NEARBY_PHOTOS = {
+  "ChIJk9b_C0lhLxMRVZU0LFFikiQ": "https://lh3.googleusercontent.com/place-photos/AJRVUZPLriRN0zWcAIWdWJeHHUhQWWVQ17Vit_CjxhXUsgI8fcD2lF8UUZAD_lVGPyCg2NcpNcruyay0zWmqcpT3mfAmgVhGzrvfzR1HHJrYddp8rhmzLu48o1Mj2X9PwLgNfMRhRCuFX1C7yCD-2uFPHAV_Cg=s4800-h400",
+  "ChIJvbFqxmNgLxMR2CDwjXDxTUI": "https://lh3.googleusercontent.com/places/ANXAkqFkP54FDpXoenaqexObYLAJXyYn1CQPi0I_nNFIx-YJNHqfWUfvQOZppTUVKKjf08papVB-CMlENkRjXSy16xuCiZWM6a2UOBw=s4800-h400",
+  "ChIJvXHn32ZgLxMRm_G_okClNeE": "https://lh3.googleusercontent.com/places/ANXAkqECq3kMzXs1bJbijAlkvpkwHgU2mrT-7lbauJDJ7qwM49GSC0_ZjhOAbGCwrgZQAQUZ2sVbbDqoo_6grfvweDT0bxdra1_7VQg=s4800-h400",
+  "ChIJK9t532BgLxMR_Dw88r_MGSU": "https://lh3.googleusercontent.com/places/ANXAkqGGScIPv1hnlEEv53u4HWhgXWDBr9-7TntQ2szpNmWNRE_ol1A-uOZzpsO65NTUQz6MnBFZdOp56OxKhtnFlXCvZnnaAxD7128=s4800-h400",
+  "ChIJdZNuZ2BgLxMROoRffR51-VY": "https://lh3.googleusercontent.com/places/ANXAkqHPTJl6OvIAlz3ml8GDf2DNNd3y6ZNj6C42K3Xo4EJghpdB1dpZQAM0WkTzzDML0Dvan82Pa1Cw0FqeNFBc0KOGZoWf7_iZHAg=s4800-h400",
+  "ChIJaVa3SWFgLxMRoJDHWzGuMNs": "https://lh3.googleusercontent.com/place-photos/AJRVUZMHd2X89t0WoGJvFuVjp8911ii5Cu1CYL4i3dBd45jXW69ONB1awN_Zv_pBN3hRG_5CZ4e-K4R0FSVyIQhmWPhILRbBsjHl6dIDSQ-eJbXPnBekuJV4Nkw334UckAK9QCitCdUuq7vIpTRUPAFGY3aD=s4800-h400",
+  "ChIJdfXYwGNgLxMR-2e_sz72n04": "https://lh3.googleusercontent.com/place-photos/AJRVUZNKRoKbKMM0VGoLQV6b9oXAQNUIon_IPJobHI7rFunTvqQnF4rwDGBj7nkt8CwZoxGnc2np5RF9umqqnLMY-2d9LogdKQnCqQtH-qczR2DM38n7YgbdH1Rv0oV_gbgjxG7yvhkrxM0H1uLkN8Q=s4800-h400",
+  "ChIJo-1DkPZhLxMRWm9ty5GH6Mc": "https://lh3.googleusercontent.com/places/ANXAkqG-LrYRjD2ZFAz4lkuR_15JXhemF43lzNsgFR9bO4l3T1vQmlK_QI1ZkMq6ma13OAZSz60DuBcECtBS23Urf7NbDaZ6qo0WJMw=s4800-h400",
+  "ChIJ0y9zzWBgLxMRMvDSjx72Ze8": "https://lh3.googleusercontent.com/places/ANXAkqEln1pzXFvu1Lf_dr2Q1LP9XwKRI0klFFkSFXP4ksuunRC7DqC1PRrsF6Tk9vbrBtUCUhFJAZdZdChqTRAY0BXI4Gh1gj4RQls=s4800-h400",
+  "ChIJ1Y4tkLFhLxMR81tVajkUTb4": "https://lh3.googleusercontent.com/place-photos/AJRVUZNBagyinwp-753ZSfLPA1fRE1l3kzGb_Ul87bnwRxwieZx05wI9Ew92D2g1DvjrCjKuffYG7RS2NMocEx2VEZfBQGnbvBK67yt279ZInX977GwijhtFuRnN1Rb1tJ49RmVeGgeoRMCTRbuA9b1P7bef=s4800-h400"
+};
+
+    // Merge coffee venues into main venues for detail panel
+    const coffeeVenueObjects = (typeof coffeeData !== 'undefined') ? coffeeData.trim().split('\n').map(line => {
+        const [id, name, lat, lng, type, day, icon, desc, url, photoName, rating, address, hours] = line.split('|');
+        return { id, name, lat: parseFloat(lat), lng: parseFloat(lng), type, day, icon, desc, url, photoName, rating, address, hours };
+    }) : [];
+
+    const venues = rawData.trim().split('\n').map(line => {
+        const [id, name, lat, lng, type, day, icon, desc, url, photoName, rating, address, hours] = line.split('|');
+        return { id, name, lat: parseFloat(lat), lng: parseFloat(lng), type, day, icon, desc, url, photoName, rating, address, hours };
+    }).concat(coffeeVenueObjects);
+
+    const typeColors = {
+        accommodation: 'purple',
+        attraction: 'red',
+        restaurant: 'orange',
+        gelato: 'pink',
+        bar: 'blue',
+        beach: 'green',
+        coffee: 'brown'
+    };
+
+    const standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' });
+    const transitBase = L.tileLayer('https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap &copy; ÖPNVKarte' });
+    const railOverlay = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap &copy; OpenRailwayMap' });
+
+    const map = L.map('map', {
+        layers: [standard]
+    });
+
+
+    
+    const baseMaps = {
+        "Standard Map": standard,
+        "Public Transit Network": transitBase
+    };
+    
+    const nearbyLayer = L.layerGroup();
+    const parsedNearby = [];
+    
+    if (nearbyDiningData.trim() !== '' && !nearbyDiningData.includes('{{' + 'NEARBY_DINING_DATA' + '}}')) {
+        const nearbyLines = nearbyDiningData.trim().split('\n');
+        nearbyLines.forEach(line => {
+            const [id, name, lat, lng, rating, price, address, url, hours] = line.split('|');
+            parsedNearby.push({id, name, lat, lng, rating, price, address, url, hours});
+            
+            const marker = L.circleMarker([parseFloat(lat), parseFloat(lng)], {
+                radius: 7,
+                fillColor: '#FFD700',
+                color: '#333',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.9
+            });
+            
+            const popupContent = `
+                <div style="min-width: 180px;">
+                    <strong>🍽️ ${name}</strong><br>
+                    <span style="color: #f39c12; font-weight: bold;">⭐ ${rating}</span> &nbsp; <span style="color: green; font-weight: bold;">${price}</span><br>
+                    <button class="btn-more" style="margin-top:8px;" onclick="openNearbyDetails('${id}')">More details →</button>
+                </div>
+            `;
+            marker.bindPopup(popupContent);
+            nearbyLayer.addLayer(marker);
+        });
+    }
+
+
+    // ---- Coffee / Espresso Layer ----
+    const coffeeData = `caffecomari|Caffè Delle Commari|41.908024|12.4540957|coffee|Base|☕|Via Santamaura 22. ⭐4.8 (14k reviews). Opens 6:30 MF, 7:00 Sun. Best all-rounder.|https://social.quandoo.com/en/groups/caffe-delle-comari-roma-92650|null|4.8|Via Santamaura 22, 00192 Roma|Mon-Fri 6:30 AM-10 PM, Sat 6:30 AM-10:30 PM, Sun 7:00 AM-10 PM
+artigiano|Artigiano Del Caffè|41.9098361|12.4555808|coffee|Base|☕|Via Famagosta 14. ⭐4.8. Artisan roastery. Opens 7:00 MF, 8:00 Sun. 2 min walk — closest!|https://artigianodelcaffe.it/|null|4.8|Via Famagosta 14, 00192 Roma|Mon-Sat 7:00 AM-4:00 PM, Sun 8:00 AM-1:00 PM
+trecaffe|Trecaffè Vaticano|41.9082158|12.4552257|coffee|Base|☕|Via Leone IV 10. ⭐4.6. Opens 7:00 MF, 7:30 Sun. 4 min walk.|http://www.trecaffe.it/|null|4.6|Via Leone IV 10, 00192 Roma|Mon-Sat 7:00 AM-4:00 PM, Sun 7:30 AM-3:00 PM
+mozart|Mozart Cafe|41.9088198|12.4587857|coffee|Base|☕|Via degli Scipioni 107. ⭐4.6. Opens 6:00 Daily. Good for pre-gym!|null|null|4.6|Via degli Scipioni 107, 00192 Roma|Daily 6:00 AM-9:00 PM
+sciascia|Sciascia Caffè 1919|41.909859|12.461994|coffee|Base|☕|Via Fabio Massimo 80. ⭐4.5. Historic (since 1919). Opens 7:00 Daily.|http://www.sciasciacaffe1919.it/|null|4.5|Via Fabio Massimo 80/a, 00192 Roma|Daily 7:00 AM-9:30 PM
+antcandia|Antico Caffè Candia|41.9072955|12.4501059|coffee|Base|☕|Via Candia 153. ⭐4.7. Opens 6:15 MF (closed Sun). Morning institution.|null|null|4.7|Via Candia 153, 00192 Roma|Mon-Sat 6:15 AM-1:30 PM, Sun Closed
+antcoria|Antico Caffè Doria|41.9089886|12.4499924|coffee|Base|☕|Via Andrea Doria 69/75. ⭐4.1. Opens 6:00 Daily. On your street!|null|null|4.1|Via Andrea Doria 69/75, 00192 Roma|Daily 6:00 AM-2:00 AM
+coffeetime|Coffee Time 49|41.90652|12.4462622|coffee|Base|☕|Via Cipro 49. ⭐4.8. Opens 7:00 Daily. Near Cipro metro.|null|null|4.8|Via Cipro 49, 00136 Roma|Mon-Fri 7:00 AM-7:00 PM, Sat 7:00 AM-6:00 PM, Sun 7:00 AM-3:00 PM`;
+
+    const coffeeVenues = coffeeData.trim().split('\n').map(line => {
+        const [id, name, lat, lng, type, day, icon, desc, url, photoName, rating, address, hours] = line.split('|');
+        return { id, name, lat: parseFloat(lat), lng: parseFloat(lng), type, day, icon, desc, url, photoName, rating, address, hours };
+    }).concat(coffeeVenueObjects);
+
+    const coffeeLayer = L.layerGroup();
+    const coffeeMarkers = {};
+    
+    coffeeVenues.forEach(v => {
+        const color = '#6F4E37'; // coffee brown
+        const marker = L.circleMarker([v.lat, v.lng], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        });
+        
+        const popupContent = `
+            <div style="min-width: 200px;">
+                <strong>${v.icon} ${v.name}</strong><br>
+                <small>${v.desc}</small><br>
+                <button class="btn-more" onclick="openDetails('${v.id}')">More details →</button>
+            </div>
+        `;
+        marker.bindPopup(popupContent);
+        coffeeMarkers[v.id] = marker;
+        coffeeLayer.addLayer(marker);
+    });
+
+    // ---- Grocery & Fresh Food Markets Layer ----
+    const groceryData = `trionfale|Mercato Trionfale|41.9085|12.4503|grocery|Base|\u{1F6D2}|Via Andrea Doria 41. \u2B504.5. Open-air fresh food market on YOUR STREET. Fruit, veg, cheese, meat, fish, bread. Mon-Sat 7:00-13:30.|null|null|4.5|Via Andrea Doria 41, 00192 Roma|Mon-Sat 7:00-13:30
+conad|TUDAY CONAD|41.9072|12.4532|grocery|Base|\u{1F6D2}|Via Silla 26/A. \u2B504.6. Best full supermarket near apartment. Good wine aisle, fresh produce.|null|null|4.6|Via Silla 26/A, 00192 Roma|Daily 8:00-21:00
+todis|Todis Supermercato|41.9075|12.4548|grocery|Base|\u{1F6D2}|Via Sebastiano Veniero 9. \u2B504.2. Italian discount chain. Great prices on basics.|null|null|4.2|Via Sebastiano Veniero 9, 00192 Roma|Mon-Sat 8:00-21:00, Sun 9:00-13:00
+pam|Supermercato Pam|41.9090|12.4580|grocery|Base|\u{1F6D2}|Via Ottaviano 17. \u2B504.3. Mid-range supermarket near Piazza Risorgimento.|null|null|4.3|Via Ottaviano 17, 00192 Roma|Mon-Sat 8:00-21:30, Sun 9:00-13:30
+castronigrocery|Castroni|41.9073023|12.4631731|grocery|Base|\u{1F6D2}|Via Cola di Rienzo 196. \u2B504.6. Historic deli/grocer. Premium olive oil, cheese, coffee beans.|null|null|4.6|Via Cola di Rienzo 196/198, 00192 Roma|Mon-Sat 8:00-20:00, Sun 9:30-20:00
+carrefoureroi|Carrefour Market P.le Degli Eroi|41.9093|12.4438|grocery|Base|\u{1F6D2}|Piazzale degli Eroi 13. \u2B504.1. Large Carrefour with full selection. 7 min walk.|null|null|4.1|P.le Degli Eroi 13, 00136 Roma|Daily 8:00-21:30`;
+
+    const groceryVenues = groceryData.trim().split('\n').map(line => {
+        const [id, name, lat, lng, type, day, icon, desc, url, photoName, rating, address, hours] = line.split('|');
+        return { id, name, lat: parseFloat(lat), lng: parseFloat(lng), type, day, icon, desc, url, photoName, rating, address, hours };
+    });
+
+    const groceryLayer = L.layerGroup();
+    const groceryMarkers = {};
+
+    groceryVenues.forEach(v => {
+        const color = '#2E7D32';
+        const marker = L.circleMarker([v.lat, v.lng], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        });
+        const popupContent = '<div style="min-width:200px;"><strong>' + v.icon + ' ' + v.name + '</strong><br><small>' + v.desc + '</small><br><small>' + v.address + '</small></div>';
+        marker.bindPopup(popupContent);
+        groceryMarkers[v.id] = marker;
+        groceryLayer.addLayer(marker);
+    });
+
+    // ---- Wine Shops Layer ----
+    const wineData = `larocca|Enoteca La Rocca in Prati|41.9068|12.4482|wine|Base|\u{1F377}|Via Cipro 75. \u2B504.9. Outstanding selection near Cipro metro. Ask for Sagrantino di Montefalco!|null|null|4.9|Via Cipro 75, 00195 Roma|Mon-Sat 10:00-20:00
+vi3|Vi3 Vini Vizi e Virtu|41.9058|12.4555|wine|Base|\u{1F377}|Piazza dell Unità 15. \u2B504.9. Tiny neighbourhood gem. Small-producer wines.|null|null|4.9|P.zza dell Unità 15, 00192 Roma|Mon-Sat 10:30-21:00
+delfrate|Enoteca Del Frate|41.9085|12.4575|wine|Base|\u{1F377}|Via degli Scipioni 122. \u2B504.6. Classic Roman wine shop. Excellent selection.|null|null|4.6|Via degli Scipioni 122, 00192 Roma|Mon-Sat 10:00-21:00
+scipioni|Magazzino Scipioni|41.9082|12.4583|wine|Base|\u{1F377}|Via degli Scipioni 30. \u2B504.6. Natural and organic wine focus.|null|null|4.6|Via degli Scipioni 30, 00192 Roma|Mon 16:00-21:00, Tue-Sat 10:00-21:00
+nobilgusto|Il Nobil Gusto|41.9080|12.4578|wine|Base|\u{1F377}|Via degli Scipioni 101. \u2B504.7. Curated selection, great value bottles.|null|null|4.7|Via degli Scipioni 101, 00192 Roma|Mon-Sat 10:00-21:30
+vitigni|Enoteca Vitigni|41.9075|12.4620|wine|Base|\u{1F377}|Via Bernardino Telesio 30. \u2B504.8. Serious wine shop. Great for regional Italian wines.|null|null|4.8|Via Bernardino Telesio 30, 00195 Roma|Mon-Sat 10:00-20:00
+costantini|Enoteca Costantini|41.9045|12.4610|wine|Base|\u{1F377}|Piazza Cavour 16b. \u2B504.3. Well-established. Large selection, good pricing.|null|null|4.3|Piazza Cavour 16 b, 00193 Roma|Mon-Sat 9:30-20:00
+cellar|Cellar Sommelier Enoteca|41.9035|12.4605|wine|Base|\u{1F377}|Via G.P. da Palestrina 66. \u2B504.9. Sommelier-run. Incredible knowledge.|null|null|4.9|Via G.P. da Palestrina 66, 00193 Roma|Mon-Sat 11:00-21:00`;
+
+    const wineVenues = wineData.trim().split('\n').map(line => {
+        const [id, name, lat, lng, type, day, icon, desc, url, photoName, rating, address, hours] = line.split('|');
+        return { id, name, lat: parseFloat(lat), lng: parseFloat(lng), type, day, icon, desc, url, photoName, rating, address, hours };
+    });
+
+    const wineLayer = L.layerGroup();
+    const wineMarkers = {};
+
+    wineVenues.forEach(v => {
+        const color = '#7B1FA2';
+        const marker = L.circleMarker([v.lat, v.lng], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        });
+        const popupContent = '<div style="min-width:200px;"><strong>' + v.icon + ' ' + v.name + '</strong><br><small>' + v.desc + '</small><br><small>' + v.address + '</small></div>';
+        marker.bindPopup(popupContent);
+        wineMarkers[v.id] = marker;
+        wineLayer.addLayer(marker);
+    });
+
+    // Add to overlay maps
+    const overlayMaps = {
+        "Rail & Tram Lines": railOverlay,
+        "Nearby Affordable Dining": nearbyLayer,
+        "Coffee": coffeeLayer,
+        "Groceries & Markets": groceryLayer,
+        "Wine Shops": wineLayer
+    };
+
+    L.control.layers(baseMaps, overlayMaps, { position: 'bottomright' }).addTo(map);
+
+    const markers = {};
+    const dayGroups = {};
+
+    // Grouping for sidebar
+    venues.forEach(v => {
+        if (!dayGroups[v.day]) dayGroups[v.day] = [];
+        dayGroups[v.day].push(v);
+    });
+
+    // Populate Sidebar and Markers
+    const sidebarList = document.getElementById('sidebar-list');
+    
+    // Coffee section at top
+    const coffeeGroupDiv = document.createElement('div');
+    coffeeGroupDiv.className = 'day-group';
+    const coffeeHeader = document.createElement('div');
+    coffeeHeader.className = 'day-header';
+    coffeeHeader.style.background = '#F5E6D3';
+    coffeeHeader.innerHTML = '<span>☕ Morning Coffee</span> <span>🗺️</span>';
+    coffeeHeader.onclick = () => {
+        if (coffeeVenues.length > 0) {
+            const bounds = L.latLngBounds(coffeeVenues.map(v => [v.lat, v.lng]));
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    };
+    coffeeGroupDiv.appendChild(coffeeHeader);
+    
+    coffeeVenues.forEach(v => {
+        const item = document.createElement('div');
+        item.className = 'venue-item';
+        item.innerHTML = `<span>☕</span> ${v.name}`;
+        item.onclick = () => {
+            map.setView([v.lat, v.lng], 17);
+            if (coffeeMarkers[v.id]) coffeeMarkers[v.id].openPopup();
+            if (window.innerWidth < 600) toggleSidebar();
+        };
+        coffeeGroupDiv.appendChild(item);
+    });
+    sidebarList.appendChild(coffeeGroupDiv);
+
+    // Grocery sidebar section
+    const groceryGroupDiv = document.createElement('div');
+    groceryGroupDiv.className = 'day-group';
+    const groceryHeader = document.createElement('div');
+    groceryHeader.className = 'day-header';
+    groceryHeader.style.background = '#E8F5E9';
+    groceryHeader.innerHTML = '<span>Groceries &amp; Markets</span> <span>Map</span>';
+    groceryHeader.onclick = () => {
+        if (groceryVenues.length > 0) {
+            const bounds = L.latLngBounds(groceryVenues.map(v => [v.lat, v.lng]));
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    };
+    groceryGroupDiv.appendChild(groceryHeader);
+
+    groceryVenues.forEach(v => {
+        const item = document.createElement('div');
+        item.className = 'venue-item';
+        item.innerHTML = '<span>' + v.icon + '</span> ' + v.name;
+        item.onclick = () => {
+            map.setView([v.lat, v.lng], 17);
+            if (groceryMarkers[v.id]) groceryMarkers[v.id].openPopup();
+            if (window.innerWidth < 600) toggleSidebar();
+        };
+        groceryGroupDiv.appendChild(item);
+    });
+    sidebarList.appendChild(groceryGroupDiv);
+
+    // Wine sidebar section
+    const wineGroupDiv = document.createElement('div');
+    wineGroupDiv.className = 'day-group';
+    const wineHeader = document.createElement('div');
+    wineHeader.className = 'day-header';
+    wineHeader.style.background = '#F3E5F5';
+    wineHeader.innerHTML = '<span>Wine Shops</span> <span>Map</span>';
+    wineHeader.onclick = () => {
+        if (wineVenues.length > 0) {
+            const bounds = L.latLngBounds(wineVenues.map(v => [v.lat, v.lng]));
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    };
+    wineGroupDiv.appendChild(wineHeader);
+
+    wineVenues.forEach(v => {
+        const item = document.createElement('div');
+        item.className = 'venue-item';
+        item.innerHTML = '<span>' + v.icon + '</span> ' + v.name;
+        item.onclick = () => {
+            map.setView([v.lat, v.lng], 17);
+            if (wineMarkers[v.id]) wineMarkers[v.id].openPopup();
+            if (window.innerWidth < 600) toggleSidebar();
+        };
+        wineGroupDiv.appendChild(item);
+    });
+    sidebarList.appendChild(wineGroupDiv);
+
+    Object.keys(dayGroups).forEach(day => {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'day-group';
+        
+        const header = document.createElement('div');
+        header.className = 'day-header';
+        header.innerHTML = `<span>${day}</span> <span>🔍</span>`;
+        header.onclick = () => zoomToDay(day);
+        
+        groupDiv.appendChild(header);
+
+        dayGroups[day].forEach(v => {
+            // Marker
+            const color = typeColors[v.type] || 'gray';
+            const marker = L.circleMarker([v.lat, v.lng], {
+                radius: 8,
+                fillColor: color,
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            const popupContent = `
+                <div style="min-width: 150px;">
+                    <strong>${v.icon} ${v.name}</strong><br>
+                    <small>${v.desc}</small><br>
+                    <small><em>${v.day}</em></small><br>
+                    <button class="btn-more" onclick="openDetails('${v.id}')">More details →</button>
+                </div>
+            `;
+            marker.bindPopup(popupContent);
+            markers[v.id] = marker;
+
+            // Sidebar Item
+            const item = document.createElement('div');
+            item.className = 'venue-item';
+            item.innerHTML = `<span>${v.icon}</span> ${v.name}`;
+            item.onclick = () => {
+                map.setView([v.lat, v.lng], 16);
+                marker.openPopup();
+                if (window.innerWidth < 600) toggleSidebar();
+            };
+            groupDiv.appendChild(item);
+        });
+
+        sidebarList.appendChild(groupDiv);
+    });
+
+    // Initial fit to all venues
+    if (venues.length > 0) {
+        const allBounds = L.latLngBounds(venues.map(v => [v.lat, v.lng]));
+        map.fitBounds(allBounds, { padding: [50, 50] });
+    }
+
+    function zoomToDay(day) {
+        const dayVenues = dayGroups[day];
+        const bounds = L.latLngBounds(dayVenues.map(v => [v.lat, v.lng]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    function openDetails(id) {
+        const v = venues.find(item => item.id === id);
+        if (!v) return;
+
+        // Close popup first
+        if (markers[id]) markers[id].closePopup();
+
+        // Populate Panel
+        document.getElementById('p-title').innerHTML = `${v.icon} ${v.name}`;
+        document.getElementById('p-rating').innerText = v.rating !== 'null' ? `⭐ ${v.rating}` : '';
+        document.getElementById('p-address').innerText = `📍 ${v.address}`;
+        document.getElementById('p-web').innerHTML = v.url !== 'null' ? `🌐 <a href="${v.url}" target="_blank">Website</a>` : '';
+        
+        const img = document.getElementById('p-photo');
+        img.dataset.lat = v.lat;
+        img.dataset.lng = v.lng;
+        const photoUrl = PHOTOS[v.id];
+        if (photoUrl) {
+            img.src = photoUrl;
+            img.style.display = 'block';
+        } else {
+            // No photo — use static OSM map as fallback
+            img.style.display = 'none';
+        }
+        document.getElementById('p-photo').src = photoUrl;
+
+        const hoursHtml = v.hours !== 'null' 
+            ? `<ul>${v.hours.split(', ').map(h => `<li>${h}</li>`).join('')}</ul>`
+            : '<p>Hours not available.</p>';
+        document.getElementById('p-hours').innerHTML = hoursHtml;
+
+        // Distance & navigate button
+        const navBtn = document.querySelector('#detail-panel .btn-more');
+        if (navBtn) navBtn.setAttribute('onclick', `navigateTo('${v.id}')`);
+        const distDiv = document.getElementById('p-distance');
+        if (userLat !== null) {
+            const dist = haversineKm(userLat, userLng, v.lat, v.lng).toFixed(1);
+            distDiv.innerHTML = `<small>📍 ${dist} km from your location</small>`;
+            getDriveTime(v.lat, v.lng).then(mins => {
+                if (mins) distDiv.innerHTML = `<small>📍 ${dist} km · ~${mins} min drive</small>`;
+            });
+        } else {
+            distDiv.innerHTML = '';
+        }
+
+        document.getElementById('detail-panel').classList.add('active');
+    }
+
+    
+    function openNearbyDetails(id) {
+        const v = parsedNearby.find(item => item.id === id);
+        if (!v) return;
+
+        // Populate Panel
+        document.getElementById('p-title').innerHTML = `🍽️ ${v.name}`;
+        document.getElementById('p-rating').innerText = `⭐ ${v.rating} • ${v.price}`;
+        document.getElementById('p-address').innerText = `📍 ${v.address}`;
+        document.getElementById('p-web').innerHTML = v.url !== 'null' ? `🌐 <a href="${v.url}" target="_blank">Website</a>` : '';
+        
+        const img = document.getElementById('p-photo');
+        img.dataset.lat = v.lat;
+        img.dataset.lng = v.lng;
+        
+        const photoUrl = typeof NEARBY_PHOTOS !== 'undefined' ? NEARBY_PHOTOS[id] : null;
+        if (photoUrl) {
+            img.src = photoUrl;
+            img.style.display = 'block';
+        } else {
+            img.style.display = 'none';
+        }
+
+        const hoursArr = v.hours && v.hours !== 'null' ? v.hours.split(' | ') : [];
+        const hoursHtml = hoursArr.length ? `<ul>${hoursArr.map(h => `<li>${h}</li>`).join('')}</ul>` : '<p>Hours not available.</p>';
+        document.getElementById('p-hours').innerHTML = hoursHtml;
+
+        // Navigation
+        const navBtn = document.querySelector('#detail-panel .btn-more');
+        if (navBtn) navBtn.setAttribute('onclick', `window.open('https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}', '_blank')`);
+        
+        const distDiv = document.getElementById('p-distance');
+        if (typeof userLat !== 'undefined' && userLat !== null) {
+            const dist = haversineKm(userLat, userLng, v.lat, v.lng).toFixed(1);
+            distDiv.innerHTML = `<small>📍 ${dist} km from your location</small>`;
+            if (typeof getDriveTime === 'function') {
+                getDriveTime(v.lat, v.lng).then(mins => {
+                    if (mins) distDiv.innerHTML = `<small>📍 ${dist} km · ~${mins} min drive</small>`;
+                });
+            }
+        } else {
+            if (distDiv) distDiv.innerHTML = '';
+        }
+
+        document.getElementById('detail-panel').classList.add('active');
+    }
+
+    function closePanel() {
+        document.getElementById('detail-panel').classList.remove('active');
+    }
+
+    // ---- Geolocation & Routing ----
+    let userMarker = null;
+    let userLat = null, userLng = null;
+    const routeCache = {};
+
+    function getUserLocation() {
+        const btn = document.getElementById('geo-btn');
+        btn.textContent = '⏳';
+        btn.disabled = true;
+        if (!navigator.geolocation) {
+            btn.textContent = '❌';
+            btn.disabled = false;
+            alert('Geolocation not supported by your browser.');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
+                if (userMarker) map.removeLayer(userMarker);
+                userMarker = L.circleMarker([userLat, userLng], {
+                    radius: 10, fillColor: '#4285F4', color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.9
+                }).addTo(map).bindPopup('📍 You are here');
+                map.setView([userLat, userLng], 14);
+                btn.textContent = '📍';
+                btn.disabled = false;
+                updateAllDistances();
+            },
+            () => { btn.textContent = '❌'; btn.disabled = false; alert('Unable to get your location.'); },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    function haversineKm(lat1, lng1, lat2, lng2) {
+        const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    async function getDriveTime(lat, lng) {
+        if (userLat === null) return null;
+        const key = `${userLat.toFixed(3)},${userLng.toFixed(3)}_${lat.toFixed(3)},${lng.toFixed(3)}`;
+        if (routeCache[key]) return routeCache[key];
+        try {
+            const resp = await fetch(`https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${lng},${lat}?overview=false`);
+            const data = await resp.json();
+            if (data.routes && data.routes[0]) {
+                const mins = Math.round(data.routes[0].duration / 60);
+                routeCache[key] = mins;
+                return mins;
+            }
+        } catch(e) {}
+        return null;
+    }
+
+    async function updateAllDistances() {
+        if (userLat === null) return;
+        document.querySelectorAll('.venue-distance').forEach(el => el.remove());
+        for (const v of venues) {
+            const dist = haversineKm(userLat, userLng, v.lat, v.lng).toFixed(1);
+            const drive = await getDriveTime(v.lat, v.lng);
+            const info = drive ? `${dist} km · ${drive} min drive` : `${dist} km`;
+            const item = document.querySelector(`.venue-item`);
+            const items = document.querySelectorAll('.venue-item');
+            items.forEach(item => {
+                if (item.textContent.includes(v.name)) {
+                    let badge = item.querySelector('.venue-distance');
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'venue-distance';
+                        badge.style.cssText = 'margin-left:auto;font-size:0.75rem;color:#666;white-space:nowrap;';
+                        item.appendChild(badge);
+                    }
+                    badge.textContent = info;
+                }
+            });
+        }
+    }
+
+    function navigateTo(id) {
+        const v = venues.find(item => item.id === id);
+        if (!v) return;
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.lat},${v.lng}`, '_blank');
+    }
+</script>
+
+</body>
+</html>

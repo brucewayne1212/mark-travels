@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambridge Hotel & Gym Map — 6 July 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0}
+#map{height:60vh;width:100%}
+.panel{padding:12px 16px;background:#16213e;border-bottom:2px solid #0f3460}
+h1{font-size:1.15rem;color:#e94560;margin-bottom:2px}
+.subtitle{font-size:.8rem;color:#888}
+.legend{padding:6px 16px;font-size:.75rem;color:#666;background:#111827}
+.legend span{margin-right:12px}
+.card{background:#16213e;border-radius:10px;padding:14px;margin:8px 14px;border-left:4px solid #4ecca3}
+.card h2{font-size:.95rem;margin-bottom:6px}
+.price{font-size:1.2rem;font-weight:700;color:#4ecca3}
+.meta{font-size:.8rem;color:#aaa;margin-top:4px;line-height:1.5}
+.tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:.7rem;margin:2px;font-weight:600}
+.tag-best{background:#4ecca3;color:#1a1a2e}
+.tag-good{background:#2196F3;color:#fff}
+.tag-ok{background:#f0a500;color:#1a1a2e}
+a{color:#4ecca3;text-decoration:none}
+.compare{margin:8px 14px;padding:12px;background:#16213e;border-radius:10px;border:1px solid #0f3460}
+.compare table{width:100%;border-collapse:collapse;font-size:.78rem}
+.compare th{text-align:left;padding:5px 8px;border-bottom:1px solid #0f3460;color:#e94560}
+.compare td{padding:5px 8px;border-bottom:1px solid #0f346033}
+.g{color:#4ecca3;font-weight:600}
+.note{padding:8px 14px;font-size:.78rem;color:#666;background:#111827}
+</style>
+</head>
+<body>
+<div class="panel">
+<h1>🗺️ Cambridge City Centre — 6 July 2026</h1>
+<div class="subtitle">Hills Road College visit · Best city centre hotels · Gym access</div>
+</div>
+<div id="map"></div>
+<div class="legend">
+<span>🏨 Hotels</span> <span>💪 Gyms</span> <span>🎓 Hills Road College</span> <span>⭕ 25-min walk</span>
+</div>
+
+<div class="card">
+<h2>🏆 Premier Inn City Centre (Corn Exchange)</h2>
+<div class="price">~£75-90<span style="font-size:.8rem;font-weight:400;color:#888"> /night est.</span></div>
+<div class="meta">
+⭐ 4.4/10 &nbsp;|&nbsp; Guildhall St, CB2 3NH — <strong>dead centre</strong><br>
+<span class="tag tag-best">4 min to King's College</span>
+<span class="tag tag-good">16 min to PureGym Grafton</span>
+<span class="tag tag-ok">28 min to Gym Group</span><br>
+<strong>To Hills Rd College:</strong> ~37 min walk (or quick bus/taxi)<br>
+<strong>Breakfast:</strong> All-you-can-eat Premier Inn breakfast ~£10.99 (or continental ~£7.99)<br>
+<strong>Vibe:</strong> Right in the heart of everything — Lion Yard, Grand Arcade, Market Square. Step outside and you're in Cambridge. Restaurants, pubs, colleges all within minutes.<br>
+<a href="https://www.premierinn.com/gb/en/hotels/england/cambridgeshire/cambridge/cambridge-city-centre-corn-exchangelion-yard.html" target="_blank">Check availability →</a>
+</div>
+</div>
+
+<div class="card">
+<h2>🏨 The Hobson Cambridge by Adina</h2>
+<div class="price">~£130-170<span style="font-size:.8rem;font-weight:400;color:#888"> /night est.</span></div>
+<div class="meta">
+⭐ 4.1 &nbsp;|&nbsp; 42-44 St Andrew's St, CB2 3AS — <strong>central</strong><br>
+<span class="tag tag-best">9 min to King's College</span>
+<span class="tag tag-good">13 min to PureGym Grafton</span>
+<span class="tag tag-good">25 min to Gym Group ✅</span><br>
+<strong>To Hills Rd College:</strong> ~32 min walk<br>
+<strong>Room:</strong> Apartment-style with kitchenette — good if you want to self-cater breakfast<br>
+<strong>Vibe:</strong> Listed building, modern apartments. Bar & restaurant on-site. Right near Christ's College.<br>
+<a href="https://thehobsoncambridge.com/" target="_blank">Check availability →</a>
+</div>
+</div>
+
+<div class="card">
+<h2>🏨 Christ's College Guest Rooms</h2>
+<div class="price">~£80-120<span style="font-size:.8rem;font-weight:400;color:#888"> /night est.</span></div>
+<div class="meta">
+⭐ 5.0 &nbsp;|&nbsp; St Andrew's St, CB2 3BU — <strong>literally IN a Cambridge college</strong><br>
+<span class="tag tag-best">6 min to King's College</span>
+<span class="tag tag-good">14 min to PureGym Grafton</span>
+<span class="tag tag-ok">26 min to Gym Group</span><br>
+<strong>To Hills Rd College:</strong> ~37 min walk<br>
+<strong>Breakfast:</strong> Often included in college guest room rates<br>
+<strong>Vibe:</strong> Stay in an actual Cambridge college — how cool is that? Available when students are away (July is summer vacation). Check directly.<br>
+<a href="https://www.christs.cam.ac.uk/" target="_blank">Check Christ's College →</a>
+</div>
+</div>
+
+<div class="card">
+<h2>🏨 Lensfield Hotel</h2>
+<div class="price">~£100-130<span style="font-size:.8rem;font-weight:400;color:#888"> /night est.</span></div>
+<div class="meta">
+⭐ 3.9 &nbsp;|&nbsp; 53 Lensfield Rd, CB2 1EN — <strong>south of centre, closer to Hills Rd</strong><br>
+<span class="tag tag-good">13 min to King's College</span>
+<span class="tag tag-good">19 min to PureGym Grafton</span>
+<span class="tag tag-ok">29 min to Gym Group</span>
+<span class="tag tag-good">25 min to Hills Rd ✅</span><br>
+<strong>Best balance:</strong> Closest to Hills Rd of all the city centre options, still walkable to everything<br>
+<a href="http://www.lensfieldhotel.co.uk/" target="_blank">Check Lensfield Hotel →</a>
+</div>
+</div>
+
+<div class="compare">
+<h2 style="font-size:.9rem;margin-bottom:8px">⚡ Quick Compare — City Centre Hotels</h2>
+<table>
+<tr><th></th><th>Premier Inn</th><th>Hobson (Adina)</th><th>Christ's College</th><th>Lensfield</th></tr>
+<tr><td><strong>Price</strong></td><td class="g">~£75-90</td><td>~£130-170</td><td class="g">~£80-120</td><td>~£100-130</td></tr>
+<tr><td><strong>To city centre</strong></td><td class="g">4 min</td><td>9 min</td><td class="g">6 min</td><td>13 min</td></tr>
+<tr><td><strong>To Hills Rd</strong></td><td>37 min</td><td>32 min</td><td>37 min</td><td class="g">25 min</td></tr>
+<tr><td><strong>To Gym Group</strong></td><td>28 min</td><td class="g">25 min</td><td>26 min</td><td>29 min</td></tr>
+<tr><td><strong>To PureGym</strong></td><td>16 min</td><td class="g">13 min</td><td>14 min</td><td>19 min</td></tr>
+<tr><td><strong>Breakfast</strong></td><td>~£11 (all-you-can-eat)</td><td>Kitchenette (DIY)</td><td>Likely included</td><td>Extra</td></tr>
+<tr><td><strong>Vibe</strong></td><td>Reliable, central</td><td>Modern apartment</td><td>Cambridge college!</td><td>Quiet, south-side</td></tr>
+</table>
+</div>
+
+<div class="note">
+<strong>💰 Budget pick:</strong> Premier Inn — cheapest, dead centre, great breakfast. 37 min walk to Hills Rd but you'll see all the colleges on the way.<br>
+<strong>🎓 Experience pick:</strong> Christ's College Guest Rooms — stay in an actual college. July is summer vacation so rooms should be available.<br>
+<strong>🏋️ Gym strategy:</strong> Gym Group (Henley Rd) is your only free option with membership. PureGym Grafton Centre (city centre) does day passes ~£8-12 as backup.<br>
+<strong>📍 Geography:</strong> The city centre hotels are all 25-37 min walk to Hills Road College — that's Cambridge, it's a compact city. You'll walk past the Backs, King's College etc. on the way.
+</div>
+
+<script>
+const map = L.map('map').setView([52.201, 0.124], 15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+const hotelIcon = L.divIcon({ html: '🏨', className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
+const gymIcon = L.divIcon({ html: '💪', className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
+const collegeIcon = L.divIcon({ html: '🎓', className: '', iconSize: [30, 30], iconAnchor: [15, 15] });
+
+// Hills Road College
+L.marker([52.1864, 0.1377], { icon: collegeIcon })
+  .addTo(map).bindPopup('<b>🎓 Hills Road College</b><br>Your destination');
+
+// Hotels
+const hotels = [
+  { name: "Premier Inn City Centre", lat: 52.2048, lng: 0.1199, note: "~£75-90 · 4 min to centre" },
+  { name: "The Hobson (Adina)", lat: 52.2025, lng: 0.1241, note: "~£130-170 · 9 min to centre" },
+  { name: "Christ's College Guest Rooms", lat: 52.2053, lng: 0.1221, note: "~£80-120 · IN a college!" },
+  { name: "Lensfield Hotel", lat: 52.1980, lng: 0.1236, note: "~£100-130 · 25 min to Hills Rd" },
+  { name: "Hilton Cambridge City Centre", lat: 52.2032, lng: 0.1220, note: "£150-200+" },
+  { name: "Hotel du Vin", lat: 52.1992, lng: 0.1217, note: "£180-220" },
+];
+hotels.forEach(h => {
+  L.marker([h.lat, h.lng], { icon: hotelIcon })
+    .addTo(map).bindPopup(`<b>🏨 ${h.name}</b><br>${h.note}`);
+});
+
+// Gyms
+const gyms = [
+  { name: "The Gym Group (YOUR MEMBERSHIP)", lat: 52.2082, lng: 0.1456, important: true },
+  { name: "PureGym Grafton Centre", lat: 52.2061, lng: 0.1350, important: true },
+];
+gyms.forEach(g => {
+  L.marker([g.lat, g.lng], { icon: gymIcon })
+    .addTo(map).bindPopup(`<b>💪 ${g.name}</b>`);
+});
+
+// Walking radius from Premier Inn (25 min = ~2075m)
+L.circle([52.2048, 0.1199], {
+  radius: 2075, color: '#4ecca3', fillColor: '#4ecca3',
+  fillOpacity: 0.04, weight: 1.5, dashArray: '6 4'
+}).addTo(map);
+</script>
+</body>
+</html>
