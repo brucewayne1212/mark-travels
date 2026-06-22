@@ -22,8 +22,12 @@
       "source": "google-places"
     },
     "cambridge": {
-      "name": null,
-      "status": "research-only, not confirmed booked"
+      "name": "The Hobson Cambridge by Adina",
+      "address": "42 Saint Andrew's Street, Cambridge CB2 3AS",
+      "lat": 52.2025175,
+      "lng": 0.1241099,
+      "bookingRef": "5445459634",
+      "source": "gmail-booking-confirmation"
     },
     "barcelona": {
       "name": null,
