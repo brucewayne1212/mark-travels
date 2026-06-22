@@ -8,7 +8,6 @@
         :root {
             --bg: #0f0f0f;
             --surface: #1a1a1a;
-            --surface2: #242424;
             --border: #333;
             --text: #e0e0e0;
             --text-muted: #888;
@@ -16,12 +15,9 @@
             --accent-dim: #2a5e8f;
             --green: #4caf50;
             --orange: #ff9800;
-            --red: #ef5350;
             --radius: 12px;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
@@ -29,38 +25,12 @@
             line-height: 1.6;
             min-height: 100vh;
         }
-
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 24px 20px;
-        }
-
-        header {
-            text-align: center;
-            padding: 48px 0 32px;
-        }
-
-        header h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-
+        .container { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+        header { text-align: center; padding: 48px 0 32px; }
+        header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
         header .emoji { font-size: 2.8rem; margin-bottom: 12px; }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-        }
-
-        .trips {
-            display: grid;
-            gap: 20px;
-            margin-top: 16px;
-        }
-
+        header p { color: var(--text-muted); font-size: 1.05rem; }
+        .trips { display: grid; gap: 20px; margin-top: 16px; }
         .trip-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -72,107 +42,50 @@
             color: inherit;
             display: block;
         }
-
-        .trip-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .trip-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 12px;
-        }
-
-        .trip-icon {
-            font-size: 2.4rem;
-            flex-shrink: 0;
-        }
-
+        .trip-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .trip-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+        .trip-icon { font-size: 2.4rem; flex-shrink: 0; }
         .trip-info { flex: 1; }
-
-        .trip-info h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .trip-dates {
-            color: var(--text-muted);
+        .trip-info h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+        .trip-dates { color: var(--text-muted); font-size: 0.95rem; }
+        .trip-countdown {
+            margin-top: 6px;
             font-size: 0.95rem;
-        }
-
-        .trip-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.82rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-
-        .trip-status.upcoming {
-            background: rgba(74, 158, 255, 0.15);
-            color: var(--accent);
+        .trip-countdown.in { color: var(--green); }
+        .trip-countdown.soon { color: var(--orange); }
+        .trip-countdown.waiting { color: var(--accent); }
+        .trip-countdown.past { color: var(--text-muted); }
+        .trip-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 0.82rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        .trip-status.past {
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--text-muted);
-        }
-
+        .trip-status.upcoming { background: rgba(74,158,255,0.15); color: var(--accent); }
+        .trip-status.active { background: rgba(76,175,80,0.15); color: var(--green); }
+        .trip-status.past { background: rgba(255,255,255,0.06); color: var(--text-muted); }
         .trip-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-top: 12px;
-            padding-top: 12px;
+            display: flex; flex-wrap: wrap; gap: 16px;
+            margin-top: 12px; padding-top: 12px;
             border-top: 1px solid var(--border);
         }
-
         .trip-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.9rem; color: var(--text-muted);
         }
-
         .trip-meta-item .icon { font-size: 1.1rem; }
-
         .map-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 16px;
-            padding: 10px 20px;
-            background: var(--accent);
-            color: #fff;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: background 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 16px; padding: 10px 20px;
+            background: var(--accent); color: #fff; border-radius: 8px;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; transition: background 0.2s;
         }
-
         .map-link:hover { background: var(--accent-dim); }
-
-        .map-link.disabled {
-            pointer-events: none;
-            opacity: 0.4;
-        }
-
-        footer {
-            text-align: center;
-            padding: 48px 0 32px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
+        .map-link.disabled { pointer-events: none; opacity: 0.4; }
+        footer { text-align: center; padding: 48px 0 32px; color: var(--text-muted); font-size: 0.85rem; }
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
             .trip-header { flex-direction: column; text-align: center; }
@@ -187,112 +100,179 @@
             <h1>Mark's Travels</h1>
             <p>Upcoming trips, itineraries &amp; interactive maps</p>
         </header>
-
-        <div class="trips">
-
-            <!-- Barcelona School Trip -->
-            <a href="trips/barcelona-2026.html" class="trip-card">
-                <div class="trip-header">
-                    <div class="trip-icon">🇪🇸</div>
-                    <div class="trip-info">
-                        <h2>Barcelona</h2>
-                        <div class="trip-dates">13 – 17 July 2026</div>
-                    </div>
-                    <span class="trip-status upcoming">Upcoming</span>
-                </div>
-                <div class="trip-meta">
-                    <div class="trip-meta-item">
-                        <span class="icon">📅</span> 5 days
-                    </div>
-                    <div class="trip-meta-item">
-                        <span class="icon">🎒</span> School trip
-                    </div>
-                </div>
-                <div class="map-link disabled">🗺️ Map coming soon</div>
-            </a>
-
-            <!-- Florida -->
-            <a href="trips/florida-2026.html" class="trip-card">
-                <div class="trip-header">
-                    <div class="trip-icon">🇺🇸</div>
-                    <div class="trip-info">
-                        <h2>Jupiter, Florida</h2>
-                        <div class="trip-dates">23 July – 1 August 2026</div>
-                    </div>
-                    <span class="trip-status upcoming">Upcoming</span>
-                </div>
-                <div class="trip-meta">
-                    <div class="trip-meta-item">
-                        <span class="icon">📅</span> 10 days
-                    </div>
-                    <div class="trip-meta-item">
-                        <span class="icon">✈️</span> LHR → JFK → MIA / PBI → ATL → LHR
-                    </div>
-                    <div class="trip-meta-item">
-                        <span class="icon">👨‍👩‍👧‍👧</span> 4 adults, 4 kids
-                    </div>
-                </div>
-                <div class="map-link disabled">🗺️ Map coming soon</div>
-            </a>
-
-            <!-- Corfu -->
-            <a href="trips/corfu-2026.html" class="trip-card">
-                <div class="trip-header">
-                    <div class="trip-icon">🇬🇷</div>
-                    <div class="trip-info">
-                        <h2>Corfu</h2>
-                        <div class="trip-dates">3 – 12 August 2026</div>
-                    </div>
-                    <span class="trip-status upcoming">Upcoming</span>
-                </div>
-                <div class="trip-meta">
-                    <div class="trip-meta-item">
-                        <span class="icon">📅</span> 10 days
-                    </div>
-                    <div class="trip-meta-item">
-                        <span class="icon">✈️</span> BA0646 / BA0645
-                    </div>
-                    <div class="trip-meta-item">
-                        <span class="icon">👨‍👩‍👧‍👧</span> Family holiday
-                    </div>
-                    <div class="trip-meta-item">
-                        <span class="icon">🏨</span> Messonghi
-                    </div>
-                </div>
-                <div class="map-link disabled">🗺️ Map coming soon</div>
-            </a>
-
-            <!-- Cambridge -->
-            <a href="trips/cambridge-2026.html" class="trip-card">
-                <div class="trip-header">
-                    <div class="trip-icon">🇬🇧</div>
-                    <div class="trip-info">
-                        <h2>Cambridge</h2>
-                        <div class="trip-dates">July 2026</div>
-                    </div>
-                    <span class="trip-status upcoming">Upcoming</span>
-                </div>
-                <div class="map-link">🗺️ View Map</div>
-            </a>
-
-            <!-- Rome (Past) -->
-            <a href="trips/rome-2026.html" class="trip-card">
-                <div class="trip-header">
-                    <div class="trip-icon">🇮🇹</div>
-                    <div class="trip-info">
-                        <h2>Rome</h2>
-                        <div class="trip-dates">24 – 29 May 2026</div>
-                    </div>
-                    <span class="trip-status past">Completed</span>
-                </div>
-                <div class="map-link">🗺️ View Map</div>
-            </a>
-
-        </div>
-
-        <footer>
-            Auto-updated from Apple Calendar · Powered by Travis
-        </footer>
+        <div class="trips" id="trips"></div>
+        <footer>Auto-updated from Apple Calendar · Powered by Travis</footer>
     </div>
+
+    <script>
+    const TRIPS = [
+        {
+            destination: "Barcelona",
+            flag: "🇪🇸",
+            start: "2026-07-13",
+            end: "2026-07-17",
+            hasMap: false,
+            page: "trips/barcelona-2026.html",
+            meta: [{ icon: "🎒", label: "School trip" }]
+        },
+        {
+            destination: "Jupiter, Florida",
+            flag: "🇺🇸",
+            start: "2026-07-23",
+            end: "2026-08-01",
+            hasMap: false,
+            page: "trips/florida-2026.html",
+            meta: [
+                { icon: "✈️", label: "LHR → JFK → MIA / PBI → ATL → LHR" },
+                { icon: "👨‍👩‍👧‍👧", label: "4 adults, 4 kids" }
+            ]
+        },
+        {
+            destination: "Corfu",
+            flag: "🇬🇷",
+            start: "2026-08-03",
+            end: "2026-08-12",
+            hasMap: false,
+            page: "trips/corfu-2026.html",
+            meta: [
+                { icon: "✈️", label: "BA0646 / BA0645" },
+                { icon: "👨‍👩‍👧‍👧", label: "Family holiday" },
+                { icon: "🏨", label: "Messonghi" }
+            ]
+        },
+        {
+            destination: "Cambridge",
+            flag: "🇬🇧",
+            start: "2026-07-06",
+            end: "2026-07-06",
+            hasMap: true,
+            page: "trips/cambridge-2026.html",
+            meta: []
+        },
+        {
+            destination: "Rome",
+            flag: "🇮🇹",
+            start: "2026-05-24",
+            end: "2026-05-29",
+            hasMap: true,
+            page: "trips/rome-2026.html",
+            meta: []
+        }
+    ];
+
+    function daysBetween(a, b) {
+        const ms = b.getTime() - a.getTime();
+        return Math.round(ms / (1000 * 60 * 60 * 24));
+    }
+
+    function formatDate(d) {
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function renderCountdown(trip) {
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        const start = new Date(trip.start + "T00:00:00");
+        const end = new Date(trip.end + "T00:00:00");
+
+        const daysUntil = daysBetween(now, start);
+        const daysTotal = daysBetween(start, end) + 1;
+
+        let html, cssClass;
+
+        if (daysUntil < 0 && daysBetween(now, end) < 0) {
+            // Trip fully in the past
+            html = `Completed — ${Math.abs(daysUntil + daysTotal - 1)} day${daysTotal > 1 ? 's' : ''} ago`;
+            cssClass = "past";
+        } else if (daysUntil <= 0 && daysBetween(now, end) >= 0) {
+            // Currently on the trip
+            const dayOf = daysBetween(start, now) + 1;
+            html = `📍 Day ${dayOf} of ${daysTotal} — happening now!`;
+            cssClass = "in";
+        } else if (daysUntil <= 3) {
+            html = `${daysUntil} day${daysUntil !== 1 ? 's' : ''} away — coming up!`;
+            cssClass = "soon";
+        } else {
+            html = `${daysUntil} days away`;
+            cssClass = "waiting";
+        }
+
+        return { html, cssClass };
+    }
+
+    function renderTrips() {
+        const container = document.getElementById("trips");
+
+        const sorted = [...TRIPS].sort((a, b) => {
+            const now = new Date(); now.setHours(0,0,0,0);
+            const aStart = new Date(a.start + "T00:00:00");
+            const bStart = new Date(b.start + "T00:00:00");
+
+            // Active trips first
+            const aActive = now >= aStart && now <= new Date(a.end + "T00:00:00");
+            const bActive = now >= bStart && now <= new Date(b.end + "T00:00:00");
+            if (aActive && !bActive) return -1;
+            if (!aActive && bActive) return 1;
+
+            // Then upcoming (not past)
+            const aPast = now > new Date(a.end + "T00:00:00");
+            const bPast = now > new Date(b.end + "T00:00:00");
+            if (aPast && !bPast) return 1;
+            if (!aPast && bPast) return -1;
+
+            // Same category: closest first
+            return aStart - bStart;
+        });
+
+        container.innerHTML = sorted.map(trip => {
+            const start = new Date(trip.start + "T00:00:00");
+            const end = new Date(trip.end + "T00:00:00");
+            const now = new Date(); now.setHours(0,0,0,0);
+            const isActive = now >= start && now <= end;
+            const isPast = now > end;
+            const daysTotal = daysBetween(start, end) + 1;
+
+            let status, statusClass;
+            if (isActive) { status = "Active"; statusClass = "active"; }
+            else if (isPast) { status = "Completed"; statusClass = "past"; }
+            else { status = "Upcoming"; statusClass = "upcoming"; }
+
+            const countdown = renderCountdown(trip);
+
+            const dateStr = daysTotal > 1
+                ? `${formatDate(start)} – ${formatDate(end)}`
+                : formatDate(start);
+
+            const metaHtml = trip.meta.length > 0
+                ? `<div class="trip-meta">${trip.meta.map(m =>
+                    `<div class="trip-meta-item"><span class="icon">${m.icon}</span> ${m.label}</div>`
+                  ).join('')}</div>`
+                : '';
+
+            const mapHtml = trip.hasMap
+                ? `<div class="map-link">🗺️ View Map</div>`
+                : `<div class="map-link disabled">🗺️ Map coming soon</div>`;
+
+            return `
+                <a href="${trip.page}" class="trip-card">
+                    <div class="trip-header">
+                        <div class="trip-icon">${trip.flag}</div>
+                        <div class="trip-info">
+                            <h2>${trip.destination}</h2>
+                            <div class="trip-dates">${dateStr}</div>
+                            <div class="trip-countdown ${countdown.cssClass}">${countdown.html}</div>
+                        </div>
+                        <span class="trip-status ${statusClass}">${status}</span>
+                    </div>
+                    ${metaHtml}
+                    ${mapHtml}
+                </a>
+            `;
+        }).join('');
+    }
+
+    renderTrips();
+    </script>
 </body>
 </html>
