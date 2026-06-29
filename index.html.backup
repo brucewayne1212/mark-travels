@@ -127,7 +127,7 @@
             flag: "🇪🇸",
             start: "2026-07-13",
             end: "2026-07-17",
-            hasMap: true,
+            hasMap: false,
             page: "trips/barcelona-2026.html",
             accommodation: null,
             accommodationNote: "School trip — group accommodation",
@@ -138,7 +138,7 @@
             flag: "🇺🇸",
             start: "2026-07-23",
             end: "2026-08-01",
-            hasMap: true,
+            hasMap: false,
             page: "trips/florida-2026.html",
             accommodation: {
                 name: "Hampton Circle (friends' house)",
@@ -156,7 +156,7 @@
             flag: "🇬🇷",
             start: "2026-08-03",
             end: "2026-08-12",
-            hasMap: true,
+            hasMap: false,
             page: "trips/corfu-2026.html",
             accommodation: {
                 name: "Three Stars Beach Hotel",
@@ -197,7 +197,6 @@
                 lat: 41.9104386,
                 lng: 12.4538441
             },
-            status: "past",
             meta: []
         }
     ];

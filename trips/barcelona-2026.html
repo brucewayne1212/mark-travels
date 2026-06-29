@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcelona 2026 - Mark's Travels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .trip-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .map-container {
+            height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .attraction-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .attraction {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .attraction h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .attraction p {
+            margin-bottom: 0;
+            color: #666;
+        }
+        .category {
+            margin-bottom: 20px;
+        }
+        .category h3 {
+            color: #3498db;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🇪🇸 Barcelona 2026</h1>
+        <p>July 13-17, 2026 | School Trip</p>
+    </div>
+    
+    <div class="content">
+        <div class="trip-info">
+            <h2>Trip Information</h2>
+            <p><strong>Dates:</strong> July 13-17, 2026 (5 days)</p>
+            <p><strong>Type:</strong> School trip with group accommodation</p>
+            <p><strong>Transport:</strong> Group transportation (school trip)</p>
+            <p><strong>Accommodation:</strong> Group accommodation (school trip)</p>
+        </div>
+
+        <div class="map-container" id="map"></div>
+
+        <div class="section">
+            <h2>Attractions & Sights</h2>
+            <div class="attraction-list">
+                <div class="attraction">
+                    <h3>🏛️ Sagrada Família</h3>
+                    <p>Gaudí's masterpiece basilica - Barcelona's most famous landmark</p>
+                </div>
+                <div class="attraction">
+                    <h3>🏛️ Casa Batlló</h3>
+                    <p>Another Gaudí architectural wonder with unique facade</p>
+                </div>
+                <div class="attraction">
+                    <h3>🏞️ Park Güell</h3>
+                    <p>Whimsical public park with mosaics and city views</p>
+                </div>
+                <div class="attraction">
+                    <h3>🏛️ Casa Milà (La Pedrera)</h3>
+                    <p>Gaudí's unconventional apartment building</p>
+                </div>
+                <div class="attraction">
+                    <h3>🏛️ Gothic Quarter (Barri Gòtic)</h3>
+                    <p>Historic medieval district with narrow streets and architecture</p>
+                </div>
+                <div class="attraction">
+                    <h3>🏟️ Camp Nou</h3>
+                    <p>FC Barcelona's famous stadium and museum</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Fitness & Gyms</h2>
+            <div class="category">
+                <h3>🏋️ Major Gym Chains</h3>
+                <div class="attraction-list">
+                    <div class="attraction">
+                        <h3>Anytime Fitness</h3>
+                        <p>24/7 access with multiple locations throughout Barcelona</p>
+                    </div>
+                    <div class="attraction">
+                        <h3>DiR</h3>
+                        <p>Premium Spanish fitness chain with excellent facilities</p>
+                    </div>
+                    <div class="attraction">
+                        <h3>Holmes Place</h3>
+                        <p>International chain with locations on Carrer Balmes and Ausias Marc</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Dining & Restaurants</h2>
+            <div class="category">
+                <h3>🍽️ Must-Try Experiences</h3>
+                <div class="attraction-list">
+                    <div class="attraction">
+                        <h3>Boqueria Market</h3>
+                        <p>Famous food market near La Rambla with fresh produce and tapas</p>
+                    </div>
+                    <div class="attraction">
+                        <h3>Tapas Bars in Gothic Quarter</h3>
+                        <p>Authentic Spanish tapas experience in historic setting</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map centered on Barcelona city center
+        const map = L.map('map').setView([41.3851, 2.1734], 13);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // School accommodation marker (using city center as reference point)
+        const schoolAccommodation = L.marker([41.3851, 2.1734])
+            .addTo(map)
+            .bindPopup('<b>School Accommodation</b><br>Group accommodation for school trip');
+        
+        // Main attractions
+        const sagradaFamilia = L.marker([41.4036, 2.1744])
+            .addTo(map)
+            .bindPopup('<b>Sagrada Família</b><br>Gaudí\'s masterpiece basilica');
+        
+        const casaBatllo = L.marker([41.3919, 2.1647])
+            .addTo(map)
+            .bindPopup('<b>Casa Batlló</b><br>Gaudí\'s modernist architecture');
+        
+        const parkGuell = L.marker([41.4145, 2.1539])
+            .addTo(map)
+            .bindPopup('<b>Park Güell</b><br>Whimsical public park with mosaics');
+        
+        const casaMila = L.marker([41.3919, 2.1608])
+            .addTo(map)
+            .bindPopup('<b>Casa Milà (La Pedrera)</b><br>Gaudí\'s unconventional apartment building');
+        
+        const gothicQuarter = L.marker([41.3831, 2.1734])
+            .addTo(map)
+            .bindPopup('<b>Gothic Quarter (Barri Gòtic)</b><br>Historic medieval district');
+        
+        const campNou = L.marker([41.3874, 2.1245])
+            .addTo(map)
+            .bindPopup('<b>Camp Nou</b><br>FC Barcelona stadium and museum');
+        
+        // Fitness locations
+        const anytimeFitness = L.marker([41.3950, 2.1800])
+            .addTo(map)
+            .bindPopup('<b>Anytime Fitness</b><br>24/7 gym access');
+        
+        const dirGym = L.marker([41.4000, 2.1700])
+            .addTo(map)
+            .bindPopup('<b>DiR</b><br>Premium Spanish fitness chain');
+        
+        const holmesPlace = L.marker([41.3890, 2.1680])
+            .addTo(map)
+            .bindPopup('<b>Holmes Place</b><br>International fitness chain');
+        
+        // Dining locations
+        const boqueriaMarket = L.marker([41.3808, 2.1680])
+            .addTo(map)
+            .bindPopup('<b>Boqueria Market</b><br>Famous food market');
+        
+        // Add circles to show walking areas
+        const walkingRadius = L.circle([41.3851, 2.1734], {
+            color: '#3498db',
+            fillColor: '#3498db',
+            fillOpacity: 0.1,
+            radius: 500
+        }).addTo(map);
+        
+        const mediumRadius = L.circle([41.3851, 2.1734], {
+            color: '#2ecc71',
+            fillColor: '#2ecc71',
+            fillOpacity: 0.1,
+            radius: 1000
+        }).addTo(map);
+        
+        // Legend
+        const legend = L.control({position: 'bottomright'});
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML =
+                '<h4>Walking Distances</h4>' +
+                '<i style="background: #3498db"></i> 5-minute walk (500m)<br>' +
+                '<i style="background: #2ecc71"></i> 10-minute walk (1000m)';
+            return div;
+        };
+        legend.addTo(map);
+    </script>
+</body>
+</html>
