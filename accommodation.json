@@ -5,21 +5,24 @@
       "address": "Via Andrea Doria 16, 00192 Roma",
       "lat": 41.9104386,
       "lng": 12.4538441,
-      "source": "travel-map-rome"
+      "source": "travel-map-rome",
+      "status": "completed"
     },
     "corfu": {
       "name": "Three Stars Beach Hotel",
       "address": "Moraitika 490 84, Greece",
       "lat": 39.4822387,
       "lng": 19.9311771,
-      "source": "google-places"
+      "source": "google-places",
+      "status": "upcoming"
     },
     "florida": {
       "name": "Hampton Circle (friends' house)",
       "address": "Hampton Cir, Jupiter, FL 33458, USA",
       "lat": 26.9138697,
       "lng": -80.1161777,
-      "source": "google-places"
+      "source": "google-places",
+      "status": "upcoming"
     },
     "cambridge": {
       "name": "The Hobson Cambridge by Adina",
@@ -27,11 +30,29 @@
       "lat": 52.2025175,
       "lng": 0.1241099,
       "bookingRef": "5445459634",
-      "source": "gmail-booking-confirmation"
+      "source": "gmail-booking-confirmation",
+      "status": "completed"
     },
     "barcelona": {
       "name": null,
-      "status": "school trip, group accommodation"
+      "status": "school trip, group accommodation",
+      "accommodationNote": "School trip — group accommodation",
+      "source": "calendar",
+      "tripStatus": "completed"
+    },
+    "porto": {
+      "name": null,
+      "status": "not-booked",
+      "accommodationNote": "Not yet booked. Recommended areas: Ribeira, Bolhão, Cedofeita",
+      "recommendedHotels": [
+        "Porto A.S. 1829 Hotel (4.6★)",
+        "Eurostars Porto Centro (4.5★)",
+        "PortoBay Hotel Teatro (4.5★)",
+        "Hotel Dom Henrique Downtown (4.4★)"
+      ],
+      "source": "google-places",
+      "tripStatus": "upcoming"
     }
-  }
+  },
+  "last_updated": "2026-07-20"
 }

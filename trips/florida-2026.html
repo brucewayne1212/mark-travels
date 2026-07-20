@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jupiter, Florida 2026 - Mark's Travels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .trip-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .trip-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .detail-item h3 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        .detail-item p {
+            margin: 0;
+            color: #34495e;
+        }
+        #map {
+            height: 500px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .location-list {
+            list-style: none;
+            padding: 0;
+        }
+        .location-list li {
+            background: #ecf0f1;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .location-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .location-details {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .note {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .note p {
+            margin: 0;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🇺🇸 Jupiter, Florida</h1>
+        <p>Family Holiday - July 23 - August 1, 2026</p>
+    </div>
+
+    <div class="content">
+        <div class="trip-info">
+            <div class="trip-details">
+                <div class="detail-item">
+                    <h3>📅 Duration</h3>
+                    <p>10 days</p>
+                </div>
+                <div class="detail-item">
+                    <h3>🏠 Accommodation</h3>
+                    <p>Hampton Circle (friends' house)</p>
+                </div>
+                <div class="detail-item">
+                    <h3>👨‍👩‍👧‍👦 Type</h3>
+                    <p>Family holiday</p>
+                </div>
+                <div class="detail-item">
+                    <h3>✈️ Flights</h3>
+                    <p>LHR → JFK → MIA / PBI → ATL → LHR</p>
+                </div>
+            </div>
+            <div class="note">
+                <p><strong>🆕 NEW TRIP</strong> - This trip appears to be new in our weekly scan. Pre-planning research completed.</p>
+            </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="section">
+            <h2>🏋️‍♂️ Gyms & Fitness Centers</h2>
+            <ul class="location-list">
+                <li>
+                    <div class="location-name">Planet Fitness</div>
+                    <div class="location-details">Multiple Jupiter locations • Judgement Free Zone • Free fitness training • Starting from $15/month • Early morning hours available</div>
+                </li>
+                <li>
+                    <div class="location-name">FitTown Jupiter</div>
+                    <div class="location-details">Community-focused gym • Welcoming environment for all fitness levels • Highly rated by local residents</div>
+                </li>
+                <li>
+                    <div class="location-name">Jupiter Community Center</div>
+                    <div class="location-details">Open Gym available • Monday-Friday 8:00am-9:00pm • Located at Community Center</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🍤 Pescatarian Restaurants</h2>
+            <ul class="location-list">
+                <li>
+                    <div class="location-name">Schooners Seafood Restaurant</div>
+                    <div class="location-details">Local landmark since 1984 • Fresh seafood filleted in house • Coastal Florida cuisine • Everything made from scratch</div>
+                </li>
+                <li>
+                    <div class="location-name">The Jupiter Grill</div>
+                    <div class="location-details">Seafood lover's paradise • Perfectly prepared snapper dishes • Sensational crab carbonara • Fresh, flavorful ingredients</div>
+                </li>
+                <li>
+                    <div class="location-name">Little Moir's Food Shack</div>
+                    <div class="location-details">Highly rated seafood option • Family-friendly casual atmosphere</div>
+                </li>
+                <li>
+                    <div class="location-name">Juno Beach Fish House</div>
+                    <div class="location-details">Fresh seafood with local flair • Popular with both locals and visitors</div>
+                </li>
+                <li>
+                    <div class="location-name">Lucky Shuck</div>
+                    <div class="location-details">Excellent seafood option • Known for fresh oysters and other seafood</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🎢 Family Attractions</h2>
+            <ul class="location-list">
+                <li>
+                    <div class="location-name">Jupiter Lighthouse</div>
+                    <div class="location-details">Iconic 1860 red landmark • Guided tours to the top • Scenic hiking trails • Educational and great photo opportunities</div>
+                </li>
+                <li>
+                    <div class="location-name">Jupiter Beach</div>
+                    <div class="location-details">Family-friendly beach with gentle waves • Picnic areas, playgrounds, restrooms, showers • Swimming, boogie-boarding, sand play</div>
+                </li>
+                <li>
+                    <div class="location-name">Juno Beach Park</div>
+                    <div class="location-details">Ideal for sand play and boogie-boarding • Free parking, showers, restrooms, picnic tables</div>
+                </li>
+                <li>
+                    <div class="location-name">River Center at Burt Reynolds Park</div>
+                    <div class="location-details">Environmental education center • Interactive exhibits including touch tank • Learn about Loxahatchee River ecosystem</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map centered on accommodation
+        var map = L.map('map').setView([26.9138697, -80.1161777], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add accommodation marker
+        L.marker([26.9138697, -80.1161777])
+            .addTo(map)
+            .bindPopup('<b>🏠 Accommodation</b><br>Hampton Circle (friends\' house)<br>Hampton Cir, Jupiter, FL 33458')
+            .openPopup();
+
+        // Add gym locations
+        var gymLocations = [
+            {lat: 26.9138697, lng: -80.1161777, name: "Planet Fitness", desc: "Multiple locations throughout Jupiter"},
+            {lat: 26.9138697, lng: -80.1161777, name: "FitTown Jupiter", desc: "Community-focused gym"},
+            {lat: 26.9138697, lng: -80.1161777, name: "Jupiter Community Center", desc: "Open Gym available"}
+        ];
+
+        gymLocations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup('<b>🏋️‍♂️ ' + loc.name + '</b><br>' + loc.desc);
+        });
+
+        // Add restaurant locations
+        var restaurantLocations = [
+            {lat: 26.9138697, lng: -80.1161777, name: "Schooners Seafood Restaurant", desc: "Local landmark since 1984"},
+            {lat: 26.9138697, lng: -80.1161777, name: "The Jupiter Grill", desc: "Seafood lover's paradise"},
+            {lat: 26.9138697, lng: -80.1161777, name: "Little Moir's Food Shack", desc: "Family-friendly seafood"}
+        ];
+
+        restaurantLocations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup('<b>🍤 ' + loc.name + '</b><br>' + loc.desc);
+        });
+
+        // Add attraction locations
+        var attractionLocations = [
+            {lat: 26.9138697, lng: -80.1161777, name: "Jupiter Lighthouse", desc: "Iconic 1860 landmark"},
+            {lat: 26.9138697, lng: -80.1161777, name: "Jupiter Beach", desc: "Family-friendly beach"},
+            {lat: 26.9138697, lng: -80.1161777, name: "Juno Beach Park", desc: "Great for beach activities"}
+        ];
+
+        attractionLocations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup('<b>🎢 ' + loc.name + '</b><br>' + loc.desc);
+        });
+    </script>
+</body>
+</html>

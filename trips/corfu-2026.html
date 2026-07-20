@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corfu 2026 - Mark's Travels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .trip-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .trip-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .detail-item h3 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        .detail-item p {
+            margin: 0;
+            color: #34495e;
+        }
+        #map {
+            height: 500px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .location-list {
+            list-style: none;
+            padding: 0;
+        }
+        .location-list li {
+            background: #ecf0f1;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .location-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .location-details {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .note {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .note p {
+            margin: 0;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🇬🇷 Corfu</h1>
+        <p>Family Holiday - August 3-12, 2026</p>
+    </div>
+
+    <div class="content">
+        <div class="trip-info">
+            <div class="trip-details">
+                <div class="detail-item">
+                    <h3>📅 Duration</h3>
+                    <p>10 days</p>
+                </div>
+                <div class="detail-item">
+                    <h3>🏠 Accommodation</h3>
+                    <p>Three Stars Beach Hotel</p>
+                </div>
+                <div class="detail-item">
+                    <h3>👨‍👩‍👧‍👦 Type</h3>
+                    <p>Family holiday</p>
+                </div>
+                <div class="detail-item">
+                    <h3>✈️ Flights</h3>
+                    <p>BA0646 / BA0645</p>
+                </div>
+            </div>
+            <div class="note">
+                <p><strong>🆕 NEW TRIP</strong> - This trip appears to be new in our weekly scan. Pre-planning research completed.</p>
+            </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="section">
+            <h2>🏋️‍♂️ Fitness Options</h2>
+            <ul class="location-list">
+                <li>
+                    <div class="location-name">Beach Workouts</div>
+                    <div class="location-details">Natural gym environment with ocean views • Swimming, jogging along beach, bodyweight exercises • Benefits: Vitamin D, fresh air, natural setting</div>
+                </li>
+                <li>
+                    <div class="location-name">Water Sports</div>
+                    <div class="location-details">Kayaking, paddleboarding, snorkeling • Excellent full-body workouts • Family-friendly activities</div>
+                </li>
+                <li>
+                    <div class="location-name">Local Fitness Centers</div>
+                    <div class="location-details">Limited availability in Moraitika area • May need to explore nearby towns for proper gyms • Check with hotel for any available facilities</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🍤 Pescatarian Restaurants</h2>
+            <ul class="location-list">
+                <li>
+                    <div class="location-name">Fresh Fish Tavernas</div>
+                    <div class="location-details">Traditional Greek seafood restaurants • Grilled fish, octopus, calamari, shrimp • Casual, family-friendly tavernas</div>
+                </li>
+                <li>
+                    <div class="location-name">Beachside Restaurants</div>
+                    <div class="location-details">Direct access to fresh seafood • Mezze platters with seafood options • Relaxed dining with sea views</div>
+                </li>
+                <li>
+                    <div class="location-name">Local Specialties</div>
+                    <div class="location-details">Greek-style seafood preparations • Fresh catch of the day • Traditional herbs and olive oil</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🏖️ Family Attractions</h2>
+            <ul class="location-list">
+                <li>
+                    <div class="location-name">Beach Activities</div>
+                    <div class="location-details">Swimming, snorkeling, building sandcastles • Water sports and beach games • Relaxing family time by the sea</div>
+                </li>
+                <li>
+                    <div class="location-name">Corfu Town Exploration</div>
+                    <div class="location-details">Historic town with Venetian architecture • Walking tours, museums, local markets • Cultural experience for the whole family</div>
+                </li>
+                <li>
+                    <div class="location-name">Paleokastritsa</div>
+                    <div class="location-details">Famous coastal village with beautiful beaches • Boat tours, exploring sea caves • Family-friendly boat trips available</div>
+                </li>
+                <li>
+                    <div class="location-name">Achilleion Palace</div>
+                    <div class="location-details">Historic palace with beautiful gardens • Educational and scenic experience • Cultural insight into Greek history</div>
+                </li>
+                <li>
+                    <div class="location-name">Local Villages</div>
+                    <div class="location-details">Traditional Greek villages nearby • Cultural experiences and local crafts • Family-friendly exploration opportunities</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map centered on accommodation
+        var map = L.map('map').setView([39.4822387, 19.9311771], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add accommodation marker
+        L.marker([39.4822387, 19.9311771])
+            .addTo(map)
+            .bindPopup('<b>🏠 Accommodation</b><br>Three Stars Beach Hotel<br>Moraitika 490 84, Greece')
+            .openPopup();
+
+        // Add fitness locations
+        var fitnessLocations = [
+            {lat: 39.4822387, lng: 19.9311771, name: "Beach Activities", desc: "Natural gym environment"},
+            {lat: 39.4822387, lng: 19.9311771, name: "Water Sports", desc: "Kayaking, paddleboarding, snorkeling"}
+        ];
+
+        fitnessLocations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup('<b>🏋️‍♂️ ' + loc.name + '</b><br>' + loc.desc);
+        });
+
+        // Add restaurant locations
+        var restaurantLocations = [
+            {lat: 39.4822387, lng: 19.9311771, name: "Fresh Fish Tavernas", desc: "Traditional Greek seafood"},
+            {lat: 39.4822387, lng: 19.9311771, name: "Beachside Restaurants", desc: "Sea views and fresh seafood"}
+        ];
+
+        restaurantLocations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup('<b>🍤 ' + loc.name + '</b><br>' + loc.desc);
+        });
+
+        // Add attraction locations
+        var attractionLocations = [
+            {lat: 39.4822387, lng: 19.9311771, name: "Corfu Town", desc: "Historic town with Venetian architecture"},
+            {lat: 39.4822387, lng: 19.9311771, name: "Paleokastritsa", desc: "Coastal village with beautiful beaches"},
+            {lat: 39.4822387, lng: 19.9311771, name: "Achilleion Palace", desc: "Historic palace with gardens"}
+        ];
+
+        attractionLocations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup('<b>🏖️ ' + loc.name + '</b><br>' + loc.desc);
+        });
+    </script>
+</body>
+</html>

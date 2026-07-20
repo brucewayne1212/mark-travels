@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porto, Portugal — October 2026 | Mark's Travels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --surface: #1a1a1a;
+            --border: #333;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --accent: #4a9eff;
+            --green: #4caf50;
+            --orange: #ff9800;
+            --red: #f44336;
+            --purple: #ab47bc;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+        header { text-align: center; padding: 32px 0 24px; }
+        header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+        header .emoji { font-size: 2.4rem; margin-bottom: 8px; }
+        header p { color: var(--text-muted); }
+        .back-link {
+            display: inline-block; margin-bottom: 16px; color: var(--accent);
+            text-decoration: none; font-size: 0.9rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .info-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px; margin-bottom: 24px;
+        }
+        .info-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+        }
+        .info-card h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+        .info-card p { font-size: 0.95rem; }
+        .flight-list { list-style: none; }
+        .flight-list li {
+            padding: 8px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.9rem; color: var(--text-muted);
+        }
+        .flight-list li:last-child { border-bottom: none; }
+        .flight-list strong { color: var(--text); }
+        #map {
+            height: 500px; border-radius: var(--radius); margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .legend {
+            display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+        }
+        .places-section { margin-bottom: 32px; }
+        .places-section h2 {
+            font-size: 1.3rem; margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .places-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+        .place-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+        }
+        .place-card:hover { border-color: var(--accent); }
+        .place-card h4 { font-size: 1rem; margin-bottom: 4px; }
+        .place-card .rating { color: var(--orange); font-size: 0.85rem; margin-bottom: 4px; }
+        .place-card .address { color: var(--text-muted); font-size: 0.82rem; }
+        .place-card .type { font-size: 0.75rem; color: var(--purple); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        footer { text-align: center; padding: 32px 0; color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← All Trips</a>
+        <header>
+            <div class="emoji">🇵🇹</div>
+            <h1>Porto, Portugal</h1>
+            <p>Friday 23 October – Monday 26 October 2026 · 3 nights</p>
+        </header>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>✈️ Flights</h3>
+                <ul class="flight-list">
+                    <li><strong>Outbound:</strong> Fri 23 Oct · TP 1329 · LGW → OPO · 12:05–14:30</li>
+                    <li><strong>Return:</strong> Mon 26 Oct · TP 1330 · OPO → LGW · 18:20–20:35</li>
+                    <li><strong>Airline:</strong> TAP Air Portugal</li>
+                    <li><strong>Confirmation:</strong> Y2ZZT5</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>🏨 Accommodation</h3>
+                <p>Not yet booked. Recommended areas: Ribeira, Bolhão, Cedofeita. See hotel pins on map.</p>
+            </div>
+            <div class="info-card">
+                <h3>📅 Duration</h3>
+                <p>3 nights · Long weekend</p>
+            </div>
+            <div class="info-card">
+                <h3>🐟 Pescatarian Notes</h3>
+                <p>Porto is excellent for seafood — bacalhau (salt cod), polvo (octopus), and fresh fish are everywhere. Pastéis de nata for breakfast!</p>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div> Hotels</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Gyms</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div> Restaurants</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ab47bc"></div> Attractions</div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="places-section">
+            <h2>🏨 Recommended Hotels</h2>
+            <div class="places-grid" id="hotels"></div>
+        </div>
+
+        <div class="places-section">
+            <h2>💪 Gyms (Early Morning)</h2>
+            <div class="places-grid" id="gyms"></div>
+        </div>
+
+        <div class="places-section">
+            <h2>🍽️ Restaurants & Seafood</h2>
+            <div class="places-grid" id="restaurants"></div>
+        </div>
+
+        <div class="places-section">
+            <h2>🏛️ Attractions</h2>
+            <div class="places-grid" id="attractions"></div>
+        </div>
+
+        <footer>Auto-generated from Apple Calendar + Google Places · October 2026</footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    const HOTELS = [
+        { name: "Porto A.S. 1829 Hotel", rating: 4.6, reviews: 770, address: "Lgo de S. Domingos 45 55, 4050-097 Porto", lat: 41.1430, lng: -8.6149, desc: "19th-century building, chic restaurant" },
+        { name: "Eurostars Porto Centro", rating: 4.5, reviews: 1122, address: "R. de Sampaio Bruno 77, 4000-124 Porto", lat: 41.1468, lng: -8.6098, desc: "Elegant building, bright rooms & suites" },
+        { name: "PortoBay Hotel Teatro", rating: 4.5, reviews: 1175, address: "R. de Sá da Bandeira 84, 4000-427 Porto", lat: 41.1467, lng: -8.6092, desc: "Theater-inspired, stylish restaurant" },
+        { name: "Hotel Dom Henrique Downtown", rating: 4.4, reviews: 2220, address: "R. do Bolhão 223, 4000-112 Porto", lat: 41.1523, lng: -8.6071, desc: "City-view restaurant, bar & gym" },
+        { name: "Mercure Porto Centro Santa Catarina", rating: 4.4, reviews: 2350, address: "Praça da Batalha 116, 4049-028 Porto", lat: 41.1454, lng: -8.6076, desc: "Theater-themed bar, sophisticated" },
+        { name: "Grande Hotel do Porto", rating: 4.4, reviews: 1619, address: "R. de Santa Catarina 197, 4000-450 Porto", lat: 41.1479, lng: -8.6066, desc: "Upscale dining, bar & gym" }
+    ];
+
+    const GYMS = [
+        { name: "PÜLSE", rating: 5.0, reviews: 60, address: "R. de Santa Catarina 375, 4000-451 Porto", lat: 41.1495, lng: -8.6060, desc: "Boutique fitness centre" },
+        { name: "Gravity Fly Fitness", rating: 5.0, reviews: 300, address: "Rua de Vilar 231, 4050-626 Porto", lat: 41.1510, lng: -8.6289, desc: "Modern fitness studio" },
+        { name: "SQUAD Porto", rating: 4.9, reviews: 168, address: "R. da Boavista 410, 4050-103 Porto", lat: 41.1562, lng: -8.6182, desc: "Premium gym" },
+        { name: "Fonseca Gym", rating: 4.7, reviews: 107, address: "R. Nova de São Crispim 267, 4000-362 Porto", lat: 41.1600, lng: -8.5949, desc: "Well-equipped local gym" },
+        { name: "Fox Gym", rating: 4.6, reviews: 580, address: "Tv. Santo Isidro 122, 4000-099 Porto", lat: 41.1591, lng: -8.6004, desc: "Popular neighbourhood gym" }
+    ];
+
+    const RESTAURANTS = [
+        { name: "Casa das Ostras", rating: 4.8, reviews: 878, address: "Mercado do Bolhão, R. Formosa 322, Porto", lat: 41.1492, lng: -8.6071, desc: "🦪 Oyster bar in Bolhão Market", type: "Oyster Bar" },
+        { name: "Meia-Nau Porto", rating: 4.7, reviews: 1714, address: "Tv. de Cedofeita 48, 4050-183 Porto", lat: 41.1498, lng: -8.6154, desc: "🐟 Excellent seafood", type: "Seafood" },
+        { name: "Ribeira Square", rating: 4.7, reviews: 3267, address: "Praça Ribeira 16, 4050-513 Porto", lat: 41.1409, lng: -8.6129, desc: "Riverside dining", type: "Portuguese" },
+        { name: "Bacalhau", rating: 4.6, reviews: 4677, address: "Muro dos Bacalhoeiros 154, Porto", lat: 41.1401, lng: -8.6159, desc: "🐟 Speciality bacalhau dishes", type: "Portuguese" },
+        { name: "Muro do Bacalhau", rating: 4.6, reviews: 3737, address: "Cais da Estiva 122, 4050-080 Porto", lat: 41.1402, lng: -8.6148, desc: "🐟 Salt cod specialists", type: "Portuguese" },
+        { name: "Taberna Dos Mercadores", rating: 4.5, reviews: 3871, address: "R. dos Mercadores 36, Porto", lat: 41.1413, lng: -8.6129, desc: "Traditional Portuguese", type: "Portuguese" },
+        { name: "Restaurante Avó Maria", rating: 4.5, reviews: 3714, address: "Cais da Ribeira 30, Porto", lat: 41.1407, lng: -8.6115, desc: "Ribeira waterfront", type: "Portuguese" },
+        { name: "Ostras & Coisas", rating: 4.3, reviews: 2797, address: "Rua da Fábrica 73, 4050-247 Porto", lat: 41.1475, lng: -8.6133, desc: "🦪 Oysters & seafood", type: "Seafood" }
+    ];
+
+    const ATTRACTIONS = [
+        { name: "Torre dos Clérigos", rating: 4.6, reviews: 21780, address: "R. de São Filipe de Nery, 4050-546 Porto", lat: 41.1457, lng: -8.6146, desc: "76m baroque bell tower with city views" },
+        { name: "Porto Cathedral (Sé)", rating: 4.6, reviews: 38138, address: "Terreiro da Sé, 4050-573 Porto", lat: 41.1429, lng: -8.6111, desc: "Hilltop Romanesque cathedral" },
+        { name: "Palácio da Bolsa", rating: 4.5, reviews: 13939, address: "R. de Ferreira Borges 11, 4050-253 Porto", lat: 41.1414, lng: -8.6157, desc: "19th-century landmark with guided tours" },
+        { name: "Parque das Virtudes", rating: 4.6, reviews: 7199, address: "Passeio das Virtudes 53, Porto", lat: 41.1447, lng: -8.6190, desc: "Garden with Douro River sunset views" },
+        { name: "Church of Saint Francis", rating: 4.4, reviews: 9778, address: "R. do Infante Dom Henrique, 4050-297 Porto", lat: 41.1410, lng: -8.6160, desc: "14th-century Gothic church with gilt wood" },
+        { name: "Praça da Liberdade", rating: 4.6, reviews: 724, address: "4000-322 Porto", lat: 41.1464, lng: -8.6113, desc: "Grand central square" }
+    ];
+
+    // Initialize map centered on Porto city centre
+    const map = L.map('map').setView([41.1470, -8.6100], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    const colors = { hotel: '#4a9eff', gym: '#4caf50', restaurant: '#ff9800', attraction: '#ab47bc' };
+    const icons = {
+        hotel: '🏨', gym: '💪', restaurant: '🍽️', attraction: '🏛️'
+    };
+
+    function addMarker(lat, lng, name, desc, type) {
+        const color = colors[type] || '#888';
+        const icon = L.divIcon({
+            html: `<div style="background:${color};width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:14px;">${icons[type] || '📍'}</div>`,
+            className: '',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        });
+        const marker = L.marker([lat, lng], { icon }).addTo(map);
+        marker.bindPopup(`<strong>${name}</strong><br><span style="color:#888;font-size:0.85rem">${desc}</span>`);
+    }
+
+    function renderPlaces(places, containerId, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = places.map(p => `
+            <div class="place-card">
+                <h4>${p.name}</h4>
+                <div class="rating">⭐ ${p.rating} · ${p.reviews.toLocaleString()} reviews</div>
+                <div class="address">📍 ${p.address}</div>
+                <div class="desc" style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">${p.desc}</div>
+                ${p.type ? `<div class="type">${p.type}</div>` : ''}
+            </div>
+        `).join('');
+        places.forEach(p => addMarker(p.lat, p.lng, p.name, p.desc, type));
+    }
+
+    renderPlaces(HOTELS, 'hotels', 'hotel');
+    renderPlaces(GYMS, 'gyms', 'gym');
+    renderPlaces(RESTAURANTS, 'restaurants', 'restaurant');
+    renderPlaces(ATTRACTIONS, 'attractions', 'attraction');
+    </script>
+</body>
+</html>
