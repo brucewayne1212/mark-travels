@@ -92,7 +92,7 @@
         <header>
             <div class="emoji">🇵🇹</div>
             <h1>Porto, Portugal</h1>
-            <p>Friday 23 October – Monday 26 October 2026 · 3 nights</p>
+            <p>Friday 23 October – Monday 26 October 2026 · 3 nights · <span style="color:var(--green)">✓ Flights confirmed</span></p>
         </header>
 
         <div class="info-grid">
@@ -124,6 +124,7 @@
             <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Gyms</div>
             <div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div> Restaurants</div>
             <div class="legend-item"><div class="legend-dot" style="background:#ab47bc"></div> Attractions</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e91e63"></div> Bars</div>
         </div>
 
         <div id="map"></div>
@@ -148,7 +149,12 @@
             <div class="places-grid" id="attractions"></div>
         </div>
 
-        <footer>Auto-generated from Apple Calendar + Google Places · October 2026</footer>
+        <div class="places-section">
+            <h2>🍸 Bars & Nightlife</h2>
+            <div class="places-grid" id="bars"></div>
+        </div>
+
+        <footer>Auto-generated from Apple Calendar + Google Places · Updated 17 Aug 2026</footer>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -163,11 +169,11 @@
     ];
 
     const GYMS = [
-        { name: "PÜLSE", rating: 5.0, reviews: 60, address: "R. de Santa Catarina 375, 4000-451 Porto", lat: 41.1495, lng: -8.6060, desc: "Boutique fitness centre" },
-        { name: "Gravity Fly Fitness", rating: 5.0, reviews: 300, address: "Rua de Vilar 231, 4050-626 Porto", lat: 41.1510, lng: -8.6289, desc: "Modern fitness studio" },
-        { name: "SQUAD Porto", rating: 4.9, reviews: 168, address: "R. da Boavista 410, 4050-103 Porto", lat: 41.1562, lng: -8.6182, desc: "Premium gym" },
-        { name: "Fonseca Gym", rating: 4.7, reviews: 107, address: "R. Nova de São Crispim 267, 4000-362 Porto", lat: 41.1600, lng: -8.5949, desc: "Well-equipped local gym" },
-        { name: "Fox Gym", rating: 4.6, reviews: 580, address: "Tv. Santo Isidro 122, 4000-099 Porto", lat: 41.1591, lng: -8.6004, desc: "Popular neighbourhood gym" }
+        { name: "SQUAD Porto", rating: 4.9, reviews: 168, address: "R. da Boavista 410, 4050-103 Porto", lat: 41.1562, lng: -8.6182, desc: "Premium gym · +351 915 265 350 · squadporto.com", phone: "+351 915 265 350", website: "http://www.squadporto.com/" },
+        { name: "Fonseca Gym", rating: 4.7, reviews: 107, address: "R. Nova de São Crispim 267, 4000-362 Porto", lat: 41.1600, lng: -8.5949, desc: "Well-equipped local gym · +351 912 974 899 · fonsecagym.pt", phone: "+351 912 974 899", website: "http://www.fonsecagym.pt/" },
+        { name: "Fox Gym", rating: 4.6, reviews: 580, address: "Tv. Santo Isidro 122, 4000-099 Porto", lat: 41.1591, lng: -8.6004, desc: "Popular neighbourhood gym · +351 967 220 078 · foxgym.pt", phone: "+351 967 220 078", website: "http://www.foxgym.pt/" },
+        { name: "AmazinGym Prelada", rating: 4.4, reviews: null, address: "R. Teodoro Sousa Maldonado 151, 4250-486 Porto", lat: 41.1620, lng: -8.6400, desc: "Suburban gym · +351 912 751 704 · amazingym.pt", phone: "+351 912 751 704", website: "http://www.amazingym.pt/" },
+        { name: "Solinca Classic Dragão", rating: 4.1, reviews: null, address: "Estádio do Dragão, 4350-415 Porto", lat: 41.1755, lng: -8.5895, desc: "Large gym at FC Porto stadium · +351 22 557 4700 · solinca.pt", phone: "+351 22 557 4700", website: "https://www.solinca.pt/" }
     ];
 
     const RESTAURANTS = [
@@ -184,9 +190,14 @@
     const ATTRACTIONS = [
         { name: "Torre dos Clérigos", rating: 4.6, reviews: 21780, address: "R. de São Filipe de Nery, 4050-546 Porto", lat: 41.1457, lng: -8.6146, desc: "76m baroque bell tower with city views" },
         { name: "Porto Cathedral (Sé)", rating: 4.6, reviews: 38138, address: "Terreiro da Sé, 4050-573 Porto", lat: 41.1429, lng: -8.6111, desc: "Hilltop Romanesque cathedral" },
+        { name: "Livraria Lello", rating: 4.0, reviews: null, address: "R. das Carmelitas 144, 4050-161 Porto", lat: 41.1478, lng: -8.6135, desc: "Iconic bookshop (Harry Potter inspiration)" },
+        { name: "Luis I Bridge", rating: 4.7, reviews: null, address: "Ponte D. Luis I, Porto", lat: 41.1385, lng: -8.6108, desc: "Iconic double-deck iron bridge with Gaia views" },
         { name: "Palácio da Bolsa", rating: 4.5, reviews: 13939, address: "R. de Ferreira Borges 11, 4050-253 Porto", lat: 41.1414, lng: -8.6157, desc: "19th-century landmark with guided tours" },
+        { name: "Jardins do Palácio de Cristal", rating: 4.6, reviews: null, address: "R. de D Manuel II, 4050-346 Porto", lat: 41.1475, lng: -8.6278, desc: "Gardens with panoramic river views" },
+        { name: "Jardim do Morro (Gaia)", rating: 4.7, reviews: null, address: "4430-210 Vila Nova de Gaia, Portugal", lat: 41.1390, lng: -8.6118, desc: "Best sunset viewpoint across the river" },
+        { name: "Porto Bridge Climb", rating: 4.7, reviews: null, address: "R. do Ouro 680, 4150-553 Porto", lat: 41.1370, lng: -8.6135, desc: "Climb the Luis I bridge arch — great for kids" },
+        { name: "World of Discoveries", rating: 4.4, reviews: null, address: "Rua de Miragaia 106, 4050-387 Porto", lat: 41.1395, lng: -8.6165, desc: "Interactive museum — good for the girls" },
         { name: "Parque das Virtudes", rating: 4.6, reviews: 7199, address: "Passeio das Virtudes 53, Porto", lat: 41.1447, lng: -8.6190, desc: "Garden with Douro River sunset views" },
-        { name: "Church of Saint Francis", rating: 4.4, reviews: 9778, address: "R. do Infante Dom Henrique, 4050-297 Porto", lat: 41.1410, lng: -8.6160, desc: "14th-century Gothic church with gilt wood" },
         { name: "Praça da Liberdade", rating: 4.6, reviews: 724, address: "4000-322 Porto", lat: 41.1464, lng: -8.6113, desc: "Grand central square" }
     ];
 
@@ -198,9 +209,16 @@
         maxZoom: 19
     }).addTo(map);
 
-    const colors = { hotel: '#4a9eff', gym: '#4caf50', restaurant: '#ff9800', attraction: '#ab47bc' };
+    const BARS = [
+        { name: "Arco Das Verdades", rating: 5.0, reviews: null, address: "Escadas das Verdades 13, 4050-622 Porto", lat: 41.1440, lng: -8.6080, desc: "Wine bar · hidden gem · +351 912 562 195", type: "Wine Bar" },
+        { name: "Curioso Cocktail Bar", rating: 4.8, reviews: null, address: "R. de Ferreira Borges 60, 4050-252 Porto", lat: 41.1415, lng: -8.6165, desc: "Cocktails & gastropub · +351 938 763 524", type: "Cocktail Bar" },
+        { name: "Apotecário Speakeasy", rating: 4.7, reviews: null, address: "R. de Ferreira Borges 60, 4050-253 Porto", lat: 41.1415, lng: -8.6168, desc: "Speakeasy cocktails · apotecariospeakeasy.com", type: "Speakeasy" },
+        { name: "Base Porto", rating: 4.5, reviews: null, address: "Passeio dos Clérigos, R. das Carmelitas 151", lat: 41.1460, lng: -8.6135, desc: "Bar at Clérigos kiosk · baseporto.com", type: "Bar" }
+    ];
+
+    const colors = { hotel: '#4a9eff', gym: '#4caf50', restaurant: '#ff9800', attraction: '#ab47bc', bar: '#e91e63' };
     const icons = {
-        hotel: '🏨', gym: '💪', restaurant: '🍽️', attraction: '🏛️'
+        hotel: '🏨', gym: '💪', restaurant: '🍽️', attraction: '🏛️', bar: '🍸'
     };
 
     function addMarker(lat, lng, name, desc, type) {
@@ -233,6 +251,7 @@
     renderPlaces(GYMS, 'gyms', 'gym');
     renderPlaces(RESTAURANTS, 'restaurants', 'restaurant');
     renderPlaces(ATTRACTIONS, 'attractions', 'attraction');
+    renderPlaces(BARS, 'bars', 'bar');
     </script>
 </body>
 </html>
