@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manchester — November 2026 | Mark's Travels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --surface: #1a1a1a;
+            --border: #333;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --accent: #4a9eff;
+            --green: #4caf50;
+            --orange: #ff9800;
+            --red: #f44336;
+            --purple: #ab47bc;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+        header { text-align: center; padding: 32px 0 24px; }
+        header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+        header .emoji { font-size: 2.4rem; margin-bottom: 8px; }
+        header p { color: var(--text-muted); }
+        .back-link {
+            display: inline-block; margin-bottom: 16px; color: var(--accent);
+            text-decoration: none; font-size: 0.9rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .info-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px; margin-bottom: 24px;
+        }
+        .info-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+        }
+        .info-card h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+        .info-card p { font-size: 0.95rem; }
+        .flight-list { list-style: none; }
+        .flight-list li {
+            padding: 8px 0; border-bottom: 1px solid var(--border);
+            font-size: 0.9rem; color: var(--text-muted);
+        }
+        .flight-list li:last-child { border-bottom: none; }
+        .flight-list strong { color: var(--text); }
+        #map {
+            height: 500px; border-radius: var(--radius); margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .legend {
+            display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+        }
+        .places-section { margin-bottom: 32px; }
+        .places-section h2 {
+            font-size: 1.3rem; margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .places-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+        .place-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+        }
+        .place-card:hover { border-color: var(--accent); }
+        .place-card h4 { font-size: 1rem; margin-bottom: 4px; }
+        .place-card .rating { color: var(--orange); font-size: 0.85rem; margin-bottom: 4px; }
+        .place-card .address { color: var(--text-muted); font-size: 0.82rem; }
+        .place-card .type { font-size: 0.75rem; color: var(--purple); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        footer { text-align: center; padding: 32px 0; color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← All Trips</a>
+        <header>
+            <div class="emoji">🇬🇧</div>
+            <h1>Manchester</h1>
+            <p>Monday 23 November – Thursday 26 November 2026 · 3 nights · <span style="color:var(--green)">✓ Hotel on calendar</span></p>
+        </header>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>🏨 Accommodation</h3>
+                <p><strong>Clayton Hotel Manchester City Centre</strong><br>
+                55 Portland St, Manchester M1 3HP<br>
+                ⭐ 4.6 · 2,628 reviews · +44 161 433 7580<br>
+                Fitness centre on site · No:55 restaurant & bar</p>
+            </div>
+            <div class="info-card">
+                <h3>📅 Duration</h3>
+                <p>3 nights · Mon 23 – Thu 26 Nov 2026<br>No flights on the Family Calendar</p>
+            </div>
+            <div class="info-card">
+                <h3>💪 05:30 gym</h3>
+                <p>Hotel has a fitness centre (hours unconfirmed).<br>
+                <strong>The Gym Group Portland Street</strong> is 24h, ~2 min walk (Faulkner St).</p>
+            </div>
+            <div class="info-card">
+                <h3>🐟 Pescatarian notes</h3>
+                <p>Closest strong options: Vincenzo (Italian), Lennox, The Refuge. Seafood: Sexy Fish (Spinningfields) and Crabbish (Chapel St / Salford).</p>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#f44336"></div> Stay</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4caf50"></div> Gyms</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div> Restaurants</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ab47bc"></div> Attractions</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e91e63"></div> Bars</div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="places-section">
+            <h2>💪 Gyms near the hotel</h2>
+            <div class="places-grid" id="gyms"></div>
+        </div>
+
+        <div class="places-section">
+            <h2>🍽️ Restaurants</h2>
+            <div class="places-grid" id="restaurants"></div>
+        </div>
+
+        <div class="places-section">
+            <h2>🏛️ Attractions</h2>
+            <div class="places-grid" id="attractions"></div>
+        </div>
+
+        <div class="places-section">
+            <h2>🍸 Bars</h2>
+            <div class="places-grid" id="bars"></div>
+        </div>
+
+        <footer>Auto-generated from Apple Calendar + Google Places · Updated 21 Sep 2026</footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    const STAY = {
+        name: "Clayton Hotel Manchester City Centre",
+        rating: 4.6,
+        reviews: 2628,
+        address: "55 Portland St, Manchester M1 3HP",
+        lat: 53.4777406,
+        lng: -2.2389075,
+        desc: "Booked stay · fitness centre on site · No:55 restaurant & bar · +44 161 433 7580"
+    };
+
+    const GYMS = [
+        { name: "The Gym Group Manchester Portland Street", rating: 4.4, reviews: 838, address: "Bank House, 2 Faulkner St, Manchester M1 4EH", lat: 53.4792374, lng: -2.2384781, desc: "24 hours · ~2 min walk from the hotel" },
+        { name: "Anytime Fitness Manchester Central", rating: 4.7, reviews: 437, address: "4A Piccadilly Pl, Manchester M1 3BN", lat: 53.4776889, lng: -2.2334862, desc: "24 hours · Piccadilly Place" },
+        { name: "V1BE Mosley Street", rating: 4.8, reviews: 72, address: "75 Mosley St, Manchester M2 3HR", lat: 53.4791713, lng: -2.2411317, desc: "High-rated boutique gym" },
+        { name: "P1 Fitness Studio", rating: 4.9, reviews: 187, address: "Kennedy St, Manchester M2 4BQ", lat: 53.4795204, lng: -2.2431133, desc: "Studio gym · Kennedy Street" },
+        { name: "King Street Gym", rating: 4.6, reviews: 161, address: "Units 7 & 8, 55 King St, Manchester M2 4LQ", lat: 53.4815869, lng: -2.2437034, desc: "Gym, pool, spa & coworking" },
+        { name: "JD Gyms Manchester", rating: 4.2, reviews: 561, address: "Bridgewater House, 58-60 Whitworth St, Manchester M1 6LT", lat: 53.4750468, lng: -2.2403817, desc: "Whitworth Street · short walk south" }
+    ];
+
+    const RESTAURANTS = [
+        { name: "Lennox", rating: 4.8, reviews: 1344, address: "60 Spring Gardens, Manchester M2 2BQ", lat: 53.4801205, lng: -2.2419559, desc: "Strong nearby dinner option", type: "Restaurant" },
+        { name: "Lucky Cat by Gordon Ramsay", rating: 4.8, reviews: 2032, address: "100 King St, Manchester M2 4WU", lat: 53.4807147, lng: -2.2422991, desc: "Asian · pricey", type: "Asian" },
+        { name: "Moose", rating: 4.6, reviews: 6692, address: "York House, 20 York St, Manchester M2 3BB", lat: 53.4804587, lng: -2.2406053, desc: "Breakfast / brunch favourite", type: "Breakfast" },
+        { name: "Vincenzo Trattoria", rating: 4.6, reviews: 1810, address: "34 St Ann St, Manchester M2 7LE", lat: 53.4816866, lng: -2.2450578, desc: "Italian — good pescatarian bet", type: "Italian" },
+        { name: "The Refuge", rating: 4.5, reviews: 4351, address: "Oxford St, Manchester M60 7HA", lat: 53.4746208, lng: -2.2408881, desc: "Grand dining hall · short walk", type: "Restaurant / bar" },
+        { name: "Mala", rating: 4.5, reviews: 3788, address: "8 Dale St, Manchester M1 1JA", lat: 53.4820264, lng: -2.2350647, desc: "Food hall / live music", type: "Food hall" },
+        { name: "SANGAM MANCHESTER", rating: 4.4, reviews: 3741, address: "98 Portland St, Manchester M1 4GX", lat: 53.4772102, lng: -2.2409623, desc: "Indian · almost next door", type: "Indian" },
+        { name: "Grand Pacific", rating: 4.4, reviews: 1821, address: "50 Spring Gardens, Manchester M2 1EN", lat: 53.4809506, lng: -2.2419730, desc: "Pan-Asian · cocktails", type: "Pan-Asian" },
+        { name: "Sexy Fish Manchester", rating: 4.2, reviews: 1392, address: "1 The Avenue, Manchester M3 3AP", lat: 53.4801160, lng: -2.2493190, desc: "Seafood · Spinningfields", type: "Seafood" },
+        { name: "Crabbish Manchester", rating: 4.7, reviews: 2171, address: "187 Chapel St, Salford M3 5EQ", lat: 53.4833563, lng: -2.2551619, desc: "Seafood · Chapel Street", type: "Seafood" }
+    ];
+
+    const ATTRACTIONS = [
+        { name: "Manchester Art Gallery", rating: 4.6, reviews: 11468, address: "Mosley St, Manchester M2 3JL", lat: 53.4786943, lng: -2.2413604, desc: "Closest major gallery — a few minutes' walk" },
+        { name: "Museum of Illusions", rating: 4.7, reviews: 2802, address: "58-66 Market St, Manchester M1 1PW", lat: 53.4825062, lng: -2.2419314, desc: "Interactive — good for the girls" },
+        { name: "Alan Turing Memorial", rating: 4.6, reviews: 1732, address: "Sackville Park, Fairfield St, Manchester M1 3HB", lat: 53.4767288, lng: -2.2360138, desc: "Sackville Park · very close" },
+        { name: "Manchester Museum", rating: 4.7, reviews: 10858, address: "Oxford Rd, Manchester M13 9PL", lat: 53.4664686, lng: -2.2342519, desc: "University museum · Oxford Road" },
+        { name: "Science and Industry Museum", rating: 4.4, reviews: 20862, address: "Liverpool Rd, Manchester M3 4JP", lat: 53.4771358, lng: -2.2545821, desc: "Castlefield · strong family option" },
+        { name: "People's History Museum", rating: 4.5, reviews: 3826, address: "Leftbank, Manchester M3 3ER", lat: 53.4814144, lng: -2.2528607, desc: "Left Bank / Spinningfields" }
+    ];
+
+    const BARS = [
+        { name: "The Old Monkey", rating: 4.3, reviews: 1587, address: "90 Portland St, Manchester M1 4GX", lat: 53.4777348, lng: -2.2401506, desc: "Joseph Holt pub · on Portland Street", type: "Pub" },
+        { name: "The Alchemist New York Street", rating: 4.5, reviews: 3779, address: "1 New York St, Manchester M1 4HD", lat: 53.4801156, lng: -2.2395759, desc: "Cocktails · very close", type: "Cocktail bar" },
+        { name: "Brewdog DogHouse Manchester", rating: 4.5, reviews: 646, address: "18-20 Fountain St, Manchester M2 2AR", lat: 53.4815246, lng: -2.2403581, desc: "Bar & rooftop", type: "Bar" },
+        { name: "Haunt MCR", rating: 4.5, reviews: 703, address: "58 Peter St, Manchester M2 3NQ", lat: 53.4776495, lng: -2.2457590, desc: "Coffee / cocktails / brunch", type: "Bar" },
+        { name: "The Piccadilly Tavern", rating: 4.3, reviews: 6233, address: "71-75 London Road, Manchester M1 2BS", lat: 53.4806707, lng: -2.2340960, desc: "Large pub near Piccadilly", type: "Pub" },
+        { name: "The Old Wellington", rating: 4.6, reviews: 5189, address: "4 Cathedral Gates, Manchester M3 1SW", lat: 53.4846763, lng: -2.2439884, desc: "Historic timber-framed pub", type: "Pub" },
+        { name: "No:55 Restaurant and Bar", rating: 4.0, reviews: 28, address: "55 Portland St, Manchester M1 3HP", lat: 53.4777390, lng: -2.2389327, desc: "In the Clayton", type: "Hotel bar" }
+    ];
+
+    const map = L.map('map').setView([STAY.lat, STAY.lng], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    const colors = { stay: '#f44336', gym: '#4caf50', restaurant: '#ff9800', attraction: '#ab47bc', bar: '#e91e63' };
+    const icons = { stay: '🏨', gym: '💪', restaurant: '🍽️', attraction: '🏛️', bar: '🍸' };
+
+    function addMarker(lat, lng, name, desc, type, large) {
+        const color = colors[type] || '#888';
+        const size = large ? 36 : 28;
+        const icon = L.divIcon({
+            html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:${large ? 18 : 14}px;">${icons[type] || '📍'}</div>`,
+            className: '',
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2]
+        });
+        const marker = L.marker([lat, lng], { icon, zIndexOffset: large ? 1000 : 0 }).addTo(map);
+        marker.bindPopup(`<strong>${name}</strong><br><span style="color:#888;font-size:0.85rem">${desc}</span>`);
+        return marker;
+    }
+
+    function renderPlaces(places, containerId, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = places.map(p => {
+            const reviewStr = p.reviews ? p.reviews.toLocaleString() + ' reviews' : 'reviews n/a';
+            return `
+            <div class="place-card">
+                <h4>${p.name}</h4>
+                <div class="rating">⭐ ${p.rating} · ${reviewStr}</div>
+                <div class="address">📍 ${p.address}</div>
+                <div class="desc" style="font-size:0.85rem;color:var(--text-muted);margin-top:4px">${p.desc}</div>
+                ${p.type ? `<div class="type">${p.type}</div>` : ''}
+            </div>`;
+        }).join('');
+        places.forEach(p => addMarker(p.lat, p.lng, p.name, p.desc, type));
+    }
+
+    addMarker(STAY.lat, STAY.lng, STAY.name, STAY.desc, 'stay', true);
+    renderPlaces(GYMS, 'gyms', 'gym');
+    renderPlaces(RESTAURANTS, 'restaurants', 'restaurant');
+    renderPlaces(ATTRACTIONS, 'attractions', 'attraction');
+    renderPlaces(BARS, 'bars', 'bar');
+    </script>
+</body>
+</html>

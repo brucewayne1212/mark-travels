@@ -36,23 +36,34 @@
     "barcelona": {
       "name": null,
       "status": "school trip, group accommodation",
-      "accommodationNote": "School trip — group accommodation",
+      "accommodationNote": "School trip \u2014 group accommodation",
       "source": "calendar",
       "tripStatus": "completed"
     },
     "porto": {
       "name": null,
       "status": "not-booked",
-      "accommodationNote": "Not yet booked. Recommended areas: Ribeira, Bolhão, Cedofeita",
+      "accommodationNote": "Not yet booked. Recommended areas: Ribeira, Bolh\u00e3o, Cedofeita",
       "recommendedHotels": [
-        "Porto A.S. 1829 Hotel (4.6★)",
-        "Eurostars Porto Centro (4.5★)",
-        "PortoBay Hotel Teatro (4.5★)",
-        "Hotel Dom Henrique Downtown (4.4★)"
+        "Porto A.S. 1829 Hotel (4.6\u2605)",
+        "Eurostars Porto Centro (4.5\u2605)",
+        "PortoBay Hotel Teatro (4.5\u2605)",
+        "Hotel Dom Henrique Downtown (4.4\u2605)"
       ],
       "source": "google-places",
       "tripStatus": "upcoming"
+    },
+    "manchester": {
+      "name": "Clayton Hotel Manchester City Centre",
+      "address": "55 Portland St, Manchester M1 3HP, UK",
+      "lat": 53.4777406,
+      "lng": -2.2389075,
+      "phone": "+44 161 433 7580",
+      "rating": 4.6,
+      "source": "family-calendar",
+      "status": "booked",
+      "tripStatus": "upcoming"
     }
   },
-  "last_updated": "2026-08-17"
+  "last_updated": "2026-09-21"
 }
