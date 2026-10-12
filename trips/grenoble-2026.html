@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grenoble — December 2026 | Mark's Travels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --bg: #0f0f0f; --surface: #1a1a1a; --border: #333;
+            --text: #e0e0e0; --text-muted: #888; --accent: #4a9eff;
+            --orange: #ff9800; --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+        header { text-align: center; padding: 32px 0 24px; }
+        header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+        header .emoji { font-size: 2.4rem; margin-bottom: 8px; }
+        header p { color: var(--text-muted); }
+        .back-link { display: inline-block; margin-bottom: 16px; color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+        .back-link:hover { text-decoration: underline; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+        .info-card h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+        .info-card p { font-size: 0.95rem; }
+        .flight-list { list-style: none; }
+        .flight-list li { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); }
+        .flight-list li:last-child { border-bottom: none; }
+        .flight-list strong { color: var(--text); }
+        .note { background: rgba(255,152,0,0.12); border: 1px solid rgba(255,152,0,0.35); color: var(--text); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 24px; font-size: 0.95rem; }
+        #map { height: 460px; border-radius: var(--radius); margin-bottom: 16px; border: 1px solid var(--border); }
+        .caption { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+        footer { text-align: center; padding: 32px 0; color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back-link" href="../index.html">← All trips</a>
+        <header>
+            <div class="emoji">🇫🇷</div>
+            <h1>Grenoble</h1>
+            <p>Sun 27 Dec 2026 – Sat 2 Jan 2027 · 6 nights · NEW on the Family Calendar</p>
+        </header>
+        <div class="note">
+            Resort / hotel is <strong>not on the Family Calendar</strong>. This page only plots what the scan actually found: two easyJet flights and Sunweb reservation <strong>KDJDFR9</strong> (guest: Mark William). Gyms, restaurants and the stay pin wait until the property is on the calendar.
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Flights</h3>
+                <ul class="flight-list">
+                    <li><strong>Out · Sun 27 Dec</strong><br>U2 8453 · LGW → GNB · 07:00–09:45<br>London Gatwick (LGW)</li>
+                    <li><strong>Back · Sat 2 Jan</strong><br>U2 8456 · GNB → LGW · 19:05–19:45<br>Grenoble Alpes Isère Airport</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>Package</h3>
+                <p><strong>Sunweb</strong> reservation KDJDFR9</p>
+                <p style="color:var(--text-muted);margin-top:8px">Calendar guest line: Mark William. No accommodation name or address on the event.</p>
+            </div>
+            <div class="info-card">
+                <h3>Check this</h3>
+                <p>The return block on the calendar is only 40 minutes (19:05–19:45). A GNB–LGW sector is normally about 2 hours — the end time may be wrong.</p>
+            </div>
+        </div>
+        <div id="map"></div>
+        <p class="caption">Pin is the airport only (45.3622, 5.3302), not a hotel. Saint-Étienne-de-Saint-Geoirs is about an hour from Grenoble city and the ski resorts.</p>
+        <footer>From the 12 Oct 2026 Family Calendar scan · Travis</footer>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const airport = [45.3621752, 5.3302444];
+        const map = L.map('map').setView(airport, 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+        L.marker(airport).addTo(map).bindPopup('<strong>Grenoble Alpes Isère Airport (GNB)</strong><br>U2 8453 arrives Sun 27 Dec 09:45<br>U2 8456 departs Sat 2 Jan 19:05');
+    </script>
+</body>
+</html>

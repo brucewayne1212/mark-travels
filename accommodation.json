@@ -63,7 +63,22 @@
       "source": "family-calendar",
       "status": "booked",
       "tripStatus": "upcoming"
+    },
+    "grenoble": {
+      "name": null,
+      "status": "not-on-calendar",
+      "accommodationNote": "Sunweb reservation KDJDFR9. Flights U2 8453 LGW-GNB 27 Dec 2026 and U2 8456 GNB-LGW 2 Jan 2027. Resort/hotel not on the Family Calendar.",
+      "airport": {
+        "name": "Grenoble Alpes Is\u00e8re Airport",
+        "iata": "GNB",
+        "address": "Rte de L A\u00e9roport, 38590 Saint-\u00c9tienne-de-Saint-Geoirs, France",
+        "lat": 45.3621752,
+        "lng": 5.3302444
+      },
+      "sunwebRef": "KDJDFR9",
+      "source": "family-calendar",
+      "tripStatus": "upcoming"
     }
   },
-  "last_updated": "2026-09-21"
+  "last_updated": "2026-10-12"
 }
