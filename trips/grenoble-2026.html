@@ -31,9 +31,15 @@
         .flight-list li { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); }
         .flight-list li:last-child { border-bottom: none; }
         .flight-list strong { color: var(--text); }
-        .note { background: rgba(255,152,0,0.12); border: 1px solid rgba(255,152,0,0.35); color: var(--text); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 24px; font-size: 0.95rem; }
-        #map { height: 460px; border-radius: var(--radius); margin-bottom: 16px; border: 1px solid var(--border); }
-        .caption { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+        .note { background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.35); color: var(--text); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 24px; font-size: 0.95rem; }
+        #map { height: 520px; border-radius: var(--radius); margin-bottom: 12px; border: 1px solid var(--border); }
+        .legend { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+        .legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .places { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 28px; }
+        .place { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; font-size: 0.9rem; }
+        .place h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .place .meta { color: var(--text-muted); font-size: 0.82rem; }
         footer { text-align: center; padding: 32px 0; color: var(--text-muted); font-size: 0.85rem; }
     </style>
 </head>
@@ -42,11 +48,15 @@
         <a class="back-link" href="../index.html">← All trips</a>
         <header>
             <div class="emoji">🇫🇷</div>
-            <h1>Grenoble</h1>
-            <p>Sun 27 Dec 2026 – Sat 2 Jan 2027 · 6 nights · NEW on the Family Calendar</p>
+            <h1>Valfréjus</h1>
+            <p>Sun 27 Dec 2026 – Sat 2 Jan 2027 · 6 nights · via Grenoble airport</p>
         </header>
         <div class="note">
+<<<<<<< HEAD
             Staying at <strong>Hôtel Valfréjus Vacances</strong> (half board, 6 nights), booked through Sunweb. The hotel is not on the Family Calendar yet, so the map pin is still the airport only.
+=======
+            Stay is <strong>Hôtel Valfréjus Vacances</strong>, 120 Place des Bergers, Valfréjus (Modane). Confirmed on Google Places 26 Oct 2026 (4.4 · 278). The Family Calendar still only has the flights — the hotel name comes from the Sunweb booking, not a new calendar event. Map is centred on the hotel. Airport is about 1h15 away and is not plotted.
+>>>>>>> 077554e (Centre the Grenoble map on Hôtel Valfréjus.)
         </div>
         <div class="info-grid">
             <div class="info-card">
@@ -57,27 +67,68 @@
                 </ul>
             </div>
             <div class="info-card">
+<<<<<<< HEAD
                 <h3>Package</h3>
                 <p><strong>Sunweb</strong> booking 6674010 · easyJet PNR KDJDFR9</p>
                 <p style="color:var(--text-muted);margin-top:8px">7 travellers · Hôtel Valfréjus Vacances ★★ · half board · Valfréjus &amp; La Norma lift passes and ski hire from 28 Dec (5 days).</p>
+=======
+                <h3>Hotel</h3>
+                <p><strong>Hôtel Valfréjus Vacances</strong> ★★</p>
+                <p style="color:var(--text-muted);margin-top:8px">120 Pl. des Bergers, 73500 Modane<br>Half board · Sunweb 6674010 · easyJet PNR KDJDFR9</p>
+>>>>>>> 077554e (Centre the Grenoble map on Hôtel Valfréjus.)
             </div>
             <div class="info-card">
-                <h3>Times</h3>
-                <p>All times are local. France is one hour ahead of the UK, so the flights are about 1h45 out (07:00 LGW → 09:45 GNB) and 1h40 back (19:05 GNB → 19:45 LGW).</p>
+                <h3>05:30 gym</h3>
+                <p><strong>Activ'Gym Modane</strong> · 4.6 (20)</p>
+                <p style="color:var(--text-muted);margin-top:8px">Opens 05:30 every day, until 21:30. About 2.1 km down in Fourneaux — nothing in the village opens that early. Pôle santé, Zone commerciale Matussière.</p>
             </div>
         </div>
         <div id="map"></div>
-        <p class="caption">Pin is the airport only (45.3622, 5.3302), not a hotel. Saint-Étienne-de-Saint-Geoirs is about an hour from Grenoble city and the ski resorts.</p>
-        <footer>From the 12 Oct 2026 Family Calendar scan · Travis</footer>
+        <div class="legend">
+            <span><i class="dot" style="background:#f44336"></i> Hotel</span>
+            <span><i class="dot" style="background:#4caf50"></i> Gym</span>
+            <span><i class="dot" style="background:#ff9800"></i> Food</span>
+            <span><i class="dot" style="background:#e91e63"></i> Bar</span>
+            <span><i class="dot" style="background:#ab47bc"></i> Resort</span>
+        </div>
+        <div class="places" id="places"></div>
+        <footer>Family Calendar still shows the two easyJet flights · hotel pin and nearby places from the 26 Oct 2026 scan · Travis</footer>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const airport = [45.3621752, 5.3302444];
-        const map = L.map('map').setView(airport, 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-        L.marker(airport).addTo(map).bindPopup('<strong>Grenoble Alpes Isère Airport (GNB)</strong><br>U2 8453 arrives Sun 27 Dec 09:45<br>U2 8456 departs Sat 2 Jan 19:05');
+        const STAY = { name: "Hôtel Valfréjus Vacances", lat: 45.1732055, lng: 6.653198, desc: "120 Pl. des Bergers · 4.4 (278) · half board" };
+        const places = [
+            { type: "gym", name: "Activ'Gym Modane", lat: 45.19152, lng: 6.64633, desc: "05:30–21:30 daily · 4.6 (20) · ~2.1 km, Fourneaux" },
+            { type: "restaurant", name: "La CABANE", lat: 45.17352, lng: 6.65250, desc: "Asian fusion · 4.7 (139) · ~80 m · 08:00–22:00" },
+            { type: "restaurant", name: "Le Globe Trotter", lat: 45.17310, lng: 6.65217, desc: "French · 4.5 (239) · Place du Thabor · ~100 m" },
+            { type: "restaurant", name: "Arctik Kota", lat: 45.17349, lng: 6.65621, desc: "Barbecue · 4.9 (21) · evenings · ~250 m" },
+            { type: "bar", name: "Bar - Snack Le Valfréjus", lat: 45.17316, lng: 6.65306, desc: "Hotel building · 16:00–22:00 · 3.3 (8)" },
+            { type: "bar", name: "Celtic Pub", lat: 45.17314, lng: 6.65192, desc: "Place du Thabor · 4.7 (135) · until 02:00" },
+            { type: "bar", name: "Rock n' Beer — Darjeeling", lat: 45.17610, lng: 6.65572, desc: "4.5 (283) · ~400 m · Tue from 16:00 (Mon closed)" },
+            { type: "attraction", name: "Ski lifts Valfréjus", lat: 45.17265, lng: 6.65225, desc: "Place du Thabor · 4.3 (2,491) · ~100 m" },
+            { type: "attraction", name: "ESF Valfréjus", lat: 45.17385, lng: 6.65381, desc: "Ski school · 4.8 (161) · ~90 m · 09:00–18:00" },
+            { type: "attraction", name: "Darjeeling Club spa", lat: 45.17618, lng: 6.65574, desc: "Spa · 4.3 (74) · ~400 m" }
+        ];
+        const colors = { stay: "#f44336", gym: "#4caf50", restaurant: "#ff9800", bar: "#e91e63", attraction: "#ab47bc" };
+        const icons = { stay: "🏨", gym: "💪", restaurant: "🍽️", bar: "🍸", attraction: "⛷️" };
+        const map = L.map("map");
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 19 }).addTo(map);
+        function addMarker(lat, lng, name, desc, type, large) {
+            const size = large ? 36 : 28;
+            const icon = L.divIcon({
+                html: `<div style="background:${colors[type]};width:${size}px;height:${size}px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:${large ? 18 : 14}px;">${icons[type]}</div>`,
+                className: "", iconSize: [size, size], iconAnchor: [size/2, size/2]
+            });
+            L.marker([lat, lng], { icon, zIndexOffset: large ? 1000 : 0 }).addTo(map)
+                .bindPopup(`<strong>${name}</strong><br><span style="color:#555">${desc}</span>`);
+        }
+        addMarker(STAY.lat, STAY.lng, STAY.name, STAY.desc, "stay", true);
+        places.forEach(p => addMarker(p.lat, p.lng, p.name, p.desc, p.type));
+        const bounds = L.latLngBounds([[STAY.lat, STAY.lng], ...places.map(p => [p.lat, p.lng])]);
+        map.fitBounds(bounds.pad(0.15));
+        document.getElementById("places").innerHTML = places.map(p =>
+            `<div class="place"><h4>${icons[p.type]} ${p.name}</h4><div class="meta">${p.desc}</div></div>`
+        ).join("");
     </script>
 </body>
 </html>

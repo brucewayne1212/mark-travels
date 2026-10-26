@@ -36,19 +36,19 @@
     "barcelona": {
       "name": null,
       "status": "school trip, group accommodation",
-      "accommodationNote": "School trip \u2014 group accommodation",
+      "accommodationNote": "School trip — group accommodation",
       "source": "calendar",
       "tripStatus": "completed"
     },
     "porto": {
       "name": null,
       "status": "not-booked",
-      "accommodationNote": "Not yet booked. Recommended areas: Ribeira, Bolh\u00e3o, Cedofeita",
+      "accommodationNote": "Not yet booked. Recommended areas: Ribeira, Bolhão, Cedofeita",
       "recommendedHotels": [
-        "Porto A.S. 1829 Hotel (4.6\u2605)",
-        "Eurostars Porto Centro (4.5\u2605)",
-        "PortoBay Hotel Teatro (4.5\u2605)",
-        "Hotel Dom Henrique Downtown (4.4\u2605)"
+        "Porto A.S. 1829 Hotel (4.6★)",
+        "Eurostars Porto Centro (4.5★)",
+        "PortoBay Hotel Teatro (4.5★)",
+        "Hotel Dom Henrique Downtown (4.4★)"
       ],
       "source": "google-places",
       "tripStatus": "upcoming"
@@ -62,23 +62,49 @@
       "rating": 4.6,
       "source": "family-calendar",
       "status": "booked",
-      "tripStatus": "upcoming"
+      "tripStatus": "upcoming",
+      "placesRecheck": "2026-10-26",
+      "gym": {
+        "name": "The Gym Group Manchester Portland Street",
+        "address": "Bank House, 2 Faulkner St, Manchester M1 4EH",
+        "lat": 53.47924,
+        "lng": -2.23848,
+        "rating": 4.4,
+        "userRatingCount": 841,
+        "hours": "24 hours"
+      }
     },
     "grenoble": {
-      "name": null,
-      "status": "not-on-calendar",
-      "accommodationNote": "Sunweb reservation KDJDFR9. Flights U2 8453 LGW-GNB 27 Dec 2026 and U2 8456 GNB-LGW 2 Jan 2027. Resort/hotel not on the Family Calendar.",
+      "name": "Hôtel Valfréjus Vacances",
+      "address": "120 Pl. des Bergers, 73500 Modane, France",
+      "lat": 45.1732055,
+      "lng": 6.653198,
+      "rating": 4.4,
+      "userRatingCount": 278,
+      "board": "half board",
+      "status": "booked",
+      "source": "sunweb-invoice-2026-10-12 confirmed google-places-2026-10-26",
+      "sunwebBooking": "6674010",
+      "easyjetPnr": "KDJDFR9",
+      "accommodationNote": "Not named on the Family Calendar. Hotel from the Sunweb invoice; coordinates from Places on 26 Oct 2026.",
+      "gym": {
+        "name": "Activ'Gym Modane",
+        "address": "Pôle santé Zone commerciale Matussière, 73500 Fourneaux, France",
+        "lat": 45.19152,
+        "lng": 6.64633,
+        "rating": 4.6,
+        "hours": "05:30-21:30 daily",
+        "note": "Only gym returned near the resort. About 2.1 km from the hotel. Opens 05:30."
+      },
       "airport": {
-        "name": "Grenoble Alpes Is\u00e8re Airport",
+        "name": "Grenoble Alpes Isère Airport",
         "iata": "GNB",
-        "address": "Rte de L A\u00e9roport, 38590 Saint-\u00c9tienne-de-Saint-Geoirs, France",
+        "address": "Rte de L Aéroport, 38590 Saint-Étienne-de-Saint-Geoirs, France",
         "lat": 45.3621752,
         "lng": 5.3302444
       },
-      "sunwebRef": "KDJDFR9",
-      "source": "family-calendar",
       "tripStatus": "upcoming"
     }
   },
-  "last_updated": "2026-10-12"
+  "last_updated": "2026-10-26"
 }
